@@ -1,0 +1,154 @@
+{
+  "nav": {
+    "dashboard": "ノード",
+    "ping": "レイテンシ",
+    "uptime": "稼働率",
+    "back": "ノード一覧へ戻る"
+  },
+  "stat": {
+    "nodes": "ノード数",
+    "online": "オンライン",
+    "offline": "オフライン",
+    "cpu": "平均 CPU",
+    "memory": "メモリ",
+    "traffic": "転送量",
+    "network": "通信速度",
+    "regions": "リージョン"
+  },
+  "card": {
+    "cpu": "CPU",
+    "memory": "メモリ",
+    "disk": "ディスク",
+    "swap": "スワップ",
+    "load": "負荷",
+    "temp": "温度",
+    "network": "ネット",
+    "uptime": "稼働",
+    "process": "プロセス",
+    "connections": "接続",
+    "gpu": "GPU",
+    "offline": "オフライン",
+    "online": "オンライン",
+    "noData": "データなし"
+  },
+  "status": {
+    "online": "オンライン",
+    "offline": "オフライン",
+    "degraded": "劣化",
+    "unhealthy": "異常"
+  },
+  "link": {
+    "connecting": "接続中",
+    "live": "リアルタイム",
+    "degraded": "劣化",
+    "stale": "データ遅延",
+    "offline": "切断",
+    "tier": "トランスポート",
+    "lastUpdate": "最終更新",
+    "explain": "接続が不安定になると、Observer は WebSocket・SSE・HTTP の順に自動で切り替えます。"
+  },
+  "view": {
+    "grid": "カード",
+    "table": "テーブル",
+    "compact": "コンパクト",
+    "search": "ノードを検索",
+    "allGroups": "すべてのグループ",
+    "sortBy": "並び替え",
+    "sort": {
+      "default": "既定",
+      "name": "名前",
+      "cpu": "CPU",
+      "memory": "メモリ",
+      "disk": "ディスク",
+      "network": "ネットワーク",
+      "uptime": "稼働時間"
+    },
+    "empty": "条件に一致するノードがありません。",
+    "noNodes": "ノードがまだ登録されていません。"
+  },
+  "detail": {
+    "hardware": "ハードウェア",
+    "system": "システム",
+    "network": "ネットワーク",
+    "billing": "課金",
+    "history": "履歴",
+    "cpuModel": "CPU",
+    "cores": "コア数",
+    "arch": "アーキテクチャ",
+    "virtualization": "仮想化",
+    "gpuModel": "GPU",
+    "os": "OS",
+    "kernel": "カーネル",
+    "region": "リージョン",
+    "group": "グループ",
+    "tags": "タグ",
+    "memory": "メモリ",
+    "swap": "スワップ",
+    "disk": "ディスク",
+    "totalUp": "累計アップロード",
+    "totalDown": "累計ダウンロード",
+    "trafficLimit": "転送量上限",
+    "price": "価格",
+    "expires": "有効期限",
+    "expired": "期限切れ",
+    "inDays": "あと {{count}} 日",
+    "notFound": "そのノードは存在しないか、閲覧権限がありません。",
+    "range": "期間",
+    "hours": "{{count}} 時間",
+    "days": "{{count}} 日",
+    "noHistory": "この期間の履歴はありません。",
+    "historyDisabled": "このサーバーでは履歴が無効です。"
+  },
+  "ping": {
+    "title": "レイテンシ",
+    "task": "プローブ",
+    "noTasks": "公開プローブが設定されていません。",
+    "loss": "ロス",
+    "avg": "平均",
+    "min": "最小",
+    "max": "最大",
+    "lossNote": "線の途切れはパケットロスであり、遅延ゼロではありません。",
+    "selectNodes": "ノード"
+  },
+  "uptime": {
+    "title": "稼働率",
+    "note": "各ブロックは 1 つの時間枠です。その枠に記録がなければ停止として扱われます。",
+    "availability": "可用性",
+    "slotOnline": "稼働",
+    "slotOffline": "停止",
+    "slotUnknown": "データなし"
+  },
+  "settings": {
+    "title": "表示",
+    "appearance": "外観",
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システムに従う",
+    "language": "言語",
+    "background": "背景",
+    "bgDefault": "サイト既定",
+    "bgNone": "なし",
+    "bgAurora": "オーロラ",
+    "bgStarfield": "星空",
+    "bgGrid": "グリッド",
+    "bgCustom": "カスタム画像 URL",
+    "bgApply": "適用",
+    "bgReset": "リセット"
+  },
+  "boot": {
+    "initializing": "初期化中",
+    "linking": "接続を確立中",
+    "ready": "準備完了"
+  },
+  "error": {
+    "title": "サーバーに接続できません",
+    "retry": "再試行",
+    "privateSite": "このダッシュボードは非公開です。",
+    "loginPrompt": "ログインするとノードを表示できます。",
+    "login": "ログイン"
+  },
+  "footer": {
+    "poweredBy": "Powered by Komari Monitor.",
+    "theme": "Observer"
+  }
+}

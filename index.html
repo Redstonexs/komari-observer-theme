@@ -1,0 +1,55 @@
+<!doctype html>
+<!--
+  Komari rewrites this file server-side. The title text, the description
+  string, and the html lang attribute below are literal sentinels the server
+  searches for; changing any of them silently breaks site configuration.
+  See docs/index-html-contract.md before editing this file.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
+    <title>Komari Monitor</title>
+    <meta name="description" content="A simple server monitor tool." />
+    <meta property="og:title" content="Komari Monitor" />
+    <meta property="og:description" content="A simple server monitor tool." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:description" content="A simple server monitor tool." />
+    <link rel="icon" href="/favicon.ico" />
+
+    <!--
+      Applied before first paint so the page never flashes the wrong appearance.
+      Reads the documented localStorage key `appearance` ("light" | "dark" | "system"),
+      tolerating the JSON-encoded form some themes write.
+    -->
+    <script>
+      (function () {
+        try {
+          var raw = localStorage.getItem("appearance");
+          if (raw && raw.charAt(0) === '"') { try { raw = JSON.parse(raw); } catch (e) {} }
+          var mode = raw === "light" || raw === "dark" ? raw : "system";
+          var dark = mode === "dark" || (mode === "system" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.dataset.appearance = dark ? "dark" : "light";
+        } catch (e) {
+          document.documentElement.dataset.appearance = "dark";
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <!--
+      Background layers live outside #root so React never re-mounts them and the
+      image/video decoder survives route changes. z-order: media < overlay < app.
+    -->
+    <div id="observer-bg" aria-hidden="true">
+      <div id="observer-bg-media"></div>
+      <canvas id="observer-bg-canvas"></canvas>
+      <div id="observer-bg-overlay"></div>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

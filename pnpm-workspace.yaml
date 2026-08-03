@@ -1,0 +1,9 @@
+# esbuild (a Vite dependency) runs a postinstall script to resolve its platform
+# binary. pnpm 10+ blocks dependency build scripts by default and fails the
+# install until each one is explicitly allowed, which would otherwise break CI.
+allowBuilds:
+  esbuild: true
+
+# Kept for pnpm 10, which reads this key instead of `allowBuilds`.
+onlyBuiltDependencies:
+  - esbuild

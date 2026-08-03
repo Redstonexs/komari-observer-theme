@@ -1,0 +1,154 @@
+{
+  "nav": {
+    "dashboard": "Fleet",
+    "ping": "Latency",
+    "uptime": "Uptime",
+    "back": "Back to fleet"
+  },
+  "stat": {
+    "nodes": "Nodes",
+    "online": "Online",
+    "offline": "Offline",
+    "cpu": "Avg CPU",
+    "memory": "Memory",
+    "traffic": "Traffic",
+    "network": "Network",
+    "regions": "Regions"
+  },
+  "card": {
+    "cpu": "CPU",
+    "memory": "MEM",
+    "disk": "DISK",
+    "swap": "SWAP",
+    "load": "LOAD",
+    "temp": "TEMP",
+    "network": "NET",
+    "uptime": "UP",
+    "process": "PROC",
+    "connections": "CONN",
+    "gpu": "GPU",
+    "offline": "Offline",
+    "online": "Online",
+    "noData": "No data"
+  },
+  "status": {
+    "online": "Online",
+    "offline": "Offline",
+    "degraded": "Degraded",
+    "unhealthy": "Unhealthy"
+  },
+  "link": {
+    "connecting": "Connecting",
+    "live": "Live",
+    "degraded": "Degraded",
+    "stale": "Stale",
+    "offline": "Disconnected",
+    "tier": "Transport",
+    "lastUpdate": "Last update",
+    "explain": "Observer steps down through WebSocket, SSE and HTTP transports automatically when a connection becomes unstable."
+  },
+  "view": {
+    "grid": "Grid",
+    "table": "Table",
+    "compact": "Compact",
+    "search": "Search nodes",
+    "allGroups": "All groups",
+    "sortBy": "Sort",
+    "sort": {
+      "default": "Default",
+      "name": "Name",
+      "cpu": "CPU",
+      "memory": "Memory",
+      "disk": "Disk",
+      "network": "Network",
+      "uptime": "Uptime"
+    },
+    "empty": "No nodes match the current filter.",
+    "noNodes": "No nodes are registered yet."
+  },
+  "detail": {
+    "hardware": "Hardware",
+    "system": "System",
+    "network": "Network",
+    "billing": "Billing",
+    "history": "History",
+    "cpuModel": "CPU",
+    "cores": "Cores",
+    "arch": "Architecture",
+    "virtualization": "Virtualization",
+    "gpuModel": "GPU",
+    "os": "OS",
+    "kernel": "Kernel",
+    "region": "Region",
+    "group": "Group",
+    "tags": "Tags",
+    "memory": "Memory",
+    "swap": "Swap",
+    "disk": "Disk",
+    "totalUp": "Total up",
+    "totalDown": "Total down",
+    "trafficLimit": "Traffic limit",
+    "price": "Price",
+    "expires": "Expires",
+    "expired": "Expired",
+    "inDays": "in {{count}}d",
+    "notFound": "That node does not exist or is not visible to you.",
+    "range": "Range",
+    "hours": "{{count}}h",
+    "days": "{{count}}d",
+    "noHistory": "No history recorded for this range.",
+    "historyDisabled": "Record keeping is disabled on this server."
+  },
+  "ping": {
+    "title": "Latency",
+    "task": "Probe",
+    "noTasks": "No public probes are configured.",
+    "loss": "Loss",
+    "avg": "Avg",
+    "min": "Min",
+    "max": "Max",
+    "lossNote": "Gaps in a line mean lost packets, not zero latency.",
+    "selectNodes": "Nodes"
+  },
+  "uptime": {
+    "title": "Uptime",
+    "note": "Each block is one time slot. A slot is marked down when no telemetry was recorded in it.",
+    "availability": "Availability",
+    "slotOnline": "Up",
+    "slotOffline": "Down",
+    "slotUnknown": "No data"
+  },
+  "settings": {
+    "title": "Display",
+    "appearance": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "language": "Language",
+    "background": "Background",
+    "bgDefault": "Site default",
+    "bgNone": "None",
+    "bgAurora": "Aurora",
+    "bgStarfield": "Starfield",
+    "bgGrid": "Grid",
+    "bgCustom": "Custom image URL",
+    "bgApply": "Apply",
+    "bgReset": "Reset"
+  },
+  "boot": {
+    "initializing": "Initializing",
+    "linking": "Establishing link",
+    "ready": "Ready"
+  },
+  "error": {
+    "title": "Cannot reach the server",
+    "retry": "Retry",
+    "privateSite": "This dashboard is private.",
+    "loginPrompt": "Sign in to view the fleet.",
+    "login": "Sign in"
+  },
+  "footer": {
+    "poweredBy": "Powered by Komari Monitor.",
+    "theme": "Observer"
+  }
+}

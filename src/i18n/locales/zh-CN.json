@@ -1,0 +1,154 @@
+{
+  "nav": {
+    "dashboard": "节点",
+    "ping": "延迟",
+    "uptime": "在线率",
+    "back": "返回节点列表"
+  },
+  "stat": {
+    "nodes": "节点总数",
+    "online": "在线",
+    "offline": "离线",
+    "cpu": "平均 CPU",
+    "memory": "内存",
+    "traffic": "流量",
+    "network": "网速",
+    "regions": "地区"
+  },
+  "card": {
+    "cpu": "CPU",
+    "memory": "内存",
+    "disk": "磁盘",
+    "swap": "交换",
+    "load": "负载",
+    "temp": "温度",
+    "network": "网络",
+    "uptime": "运行",
+    "process": "进程",
+    "connections": "连接",
+    "gpu": "GPU",
+    "offline": "离线",
+    "online": "在线",
+    "noData": "暂无数据"
+  },
+  "status": {
+    "online": "在线",
+    "offline": "离线",
+    "degraded": "降级",
+    "unhealthy": "异常"
+  },
+  "link": {
+    "connecting": "连接中",
+    "live": "实时",
+    "degraded": "降级",
+    "stale": "数据过期",
+    "offline": "已断开",
+    "tier": "传输通道",
+    "lastUpdate": "最后更新",
+    "explain": "连接不稳定时，Observer 会在 WebSocket、SSE 与 HTTP 之间自动降级。"
+  },
+  "view": {
+    "grid": "卡片",
+    "table": "表格",
+    "compact": "紧凑",
+    "search": "搜索节点",
+    "allGroups": "全部分组",
+    "sortBy": "排序",
+    "sort": {
+      "default": "默认",
+      "name": "名称",
+      "cpu": "CPU",
+      "memory": "内存",
+      "disk": "磁盘",
+      "network": "网络",
+      "uptime": "运行时间"
+    },
+    "empty": "没有符合当前筛选条件的节点。",
+    "noNodes": "尚未注册任何节点。"
+  },
+  "detail": {
+    "hardware": "硬件",
+    "system": "系统",
+    "network": "网络",
+    "billing": "账单",
+    "history": "历史",
+    "cpuModel": "处理器",
+    "cores": "核心数",
+    "arch": "架构",
+    "virtualization": "虚拟化",
+    "gpuModel": "显卡",
+    "os": "操作系统",
+    "kernel": "内核",
+    "region": "地区",
+    "group": "分组",
+    "tags": "标签",
+    "memory": "内存",
+    "swap": "交换分区",
+    "disk": "磁盘",
+    "totalUp": "累计上传",
+    "totalDown": "累计下载",
+    "trafficLimit": "流量限额",
+    "price": "价格",
+    "expires": "到期",
+    "expired": "已过期",
+    "inDays": "{{count}} 天后",
+    "notFound": "该节点不存在或对你不可见。",
+    "range": "时间范围",
+    "hours": "{{count}} 小时",
+    "days": "{{count}} 天",
+    "noHistory": "该时间范围内没有历史记录。",
+    "historyDisabled": "该服务器已关闭历史记录。"
+  },
+  "ping": {
+    "title": "延迟",
+    "task": "探测任务",
+    "noTasks": "没有配置公开的探测任务。",
+    "loss": "丢包",
+    "avg": "平均",
+    "min": "最小",
+    "max": "最大",
+    "lossNote": "线段中的断口表示丢包，而不是零延迟。",
+    "selectNodes": "节点"
+  },
+  "uptime": {
+    "title": "在线率",
+    "note": "每个方块代表一个时间片，该时间片内没有任何上报即判定为离线。",
+    "availability": "可用率",
+    "slotOnline": "在线",
+    "slotOffline": "离线",
+    "slotUnknown": "无数据"
+  },
+  "settings": {
+    "title": "显示",
+    "appearance": "外观",
+    "light": "浅色",
+    "dark": "深色",
+    "system": "跟随系统",
+    "language": "语言",
+    "background": "背景",
+    "bgDefault": "站点默认",
+    "bgNone": "无",
+    "bgAurora": "极光",
+    "bgStarfield": "星空",
+    "bgGrid": "网格",
+    "bgCustom": "自定义图片地址",
+    "bgApply": "应用",
+    "bgReset": "重置"
+  },
+  "boot": {
+    "initializing": "初始化中",
+    "linking": "建立连接",
+    "ready": "就绪"
+  },
+  "error": {
+    "title": "无法连接服务器",
+    "retry": "重试",
+    "privateSite": "此监控面板为私有。",
+    "loginPrompt": "登录后查看节点。",
+    "login": "登录"
+  },
+  "footer": {
+    "poweredBy": "Powered by Komari Monitor.",
+    "theme": "Observer"
+  }
+}

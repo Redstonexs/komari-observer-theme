@@ -1,0 +1,36 @@
+name: Test build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm exec tsc -b
+
+      - name: Build
+        run: pnpm build
+
+      # Everything this checks is silent at build time and only surfaces once
+      # the theme is installed on a live server. See scripts/verify-dist.mjs.
+      - name: Verify theme package contract
+        run: pnpm verify

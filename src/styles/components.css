@@ -1,0 +1,968 @@
+/* =====================================================================
+   Observer — component styles
+   ===================================================================== */
+
+/* ---- Shell ------------------------------------------------------- */
+
+.observer-main {
+  flex: 1;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 20px 48px;
+}
+
+.observer-page {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--observer-gap) * 1.4);
+  padding-top: 20px;
+}
+
+.observer-page-title {
+  margin: 0;
+  font-size: 12px;
+}
+
+.observer-rule {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    var(--observer-line-strong),
+    var(--observer-line) 40%,
+    transparent
+  );
+}
+
+/* ---- Header ------------------------------------------------------ */
+
+.observer-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in oklch, var(--observer-bg) 82%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.observer-header-inner {
+  max-width: var(--observer-content-max);
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.observer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  color: var(--observer-text);
+}
+
+.observer-brand-mark {
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--observer-accent);
+  border-radius: 1px;
+  transform: rotate(45deg);
+  background: color-mix(in oklch, var(--observer-accent) 25%, transparent);
+}
+
+.observer-brand-name {
+  font-family: var(--observer-font-chrome);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.observer-nav {
+  display: flex;
+  gap: 4px;
+  margin-inline-start: auto;
+}
+
+.observer-navlink {
+  font-family: var(--observer-font-chrome);
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--observer-text-muted);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: var(--observer-radius);
+  border: 1px solid transparent;
+  transition: color var(--observer-dur-fast) var(--observer-ease);
+}
+
+.observer-navlink:hover {
+  color: var(--observer-text);
+}
+
+.observer-navlink.active {
+  color: var(--observer-accent);
+  border-color: color-mix(in oklch, var(--observer-accent) 35%, transparent);
+  background: color-mix(in oklch, var(--observer-accent) 8%, transparent);
+}
+
+.observer-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.observer-iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--observer-line);
+  border-radius: var(--observer-radius);
+  background: transparent;
+  color: var(--observer-text-muted);
+  cursor: pointer;
+}
+
+.observer-iconbtn:hover {
+  color: var(--observer-accent);
+  border-color: color-mix(in oklch, var(--observer-accent) 40%, transparent);
+}
+
+/* ---- Connection badge -------------------------------------------- */
+
+.observer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 9px;
+  border: 1px solid var(--observer-line);
+  border-radius: 99px;
+  cursor: help;
+}
+
+.observer-link-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.observer-link[data-tone="ok"] .observer-link-dot {
+  background: var(--observer-ok);
+}
+.observer-link[data-tone="warn"] .observer-link-dot {
+  background: var(--observer-warn);
+}
+.observer-link[data-tone="bad"] .observer-link-dot {
+  background: var(--observer-bad);
+}
+
+/* Only the live state pulses — a stale link that keeps blinking reads as
+   healthy, which is exactly the confusion this badge exists to prevent. */
+:root[data-glow="on"] .observer-link[data-tone="ok"] .observer-link-dot {
+  animation: observer-breathe 2.6s ease-in-out infinite;
+}
+
+@keyframes observer-breathe {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 color-mix(in oklch, var(--observer-ok) 60%, transparent); }
+  50% { opacity: 0.75; box-shadow: 0 0 0 4px transparent; }
+}
+
+.observer-link-tier {
+  color: var(--observer-text-faint);
+  font-size: 10px;
+}
+
+@media (max-width: 720px) {
+  .observer-link-state {
+    display: none;
+  }
+}
+
+/* ---- Settings panel ---------------------------------------------- */
+
+.observer-settings {
+  position: absolute;
+  right: 20px;
+  top: 56px;
+  width: min(320px, calc(100vw - 40px));
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 30;
+}
+
+.observer-settings h3 {
+  margin: 0 0 8px;
+  font-size: 10px;
+}
+
+.observer-field {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.observer-field input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-family: var(--observer-font-chrome);
+  color: var(--observer-text);
+  background: color-mix(in oklch, var(--observer-bg-deep) 60%, transparent);
+  border: 1px solid var(--observer-line);
+  border-radius: var(--observer-radius);
+}
+
+.observer-field button {
+  padding: 6px 10px;
+  font-size: 11px;
+  font-family: var(--observer-font-chrome);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--observer-accent);
+  background: transparent;
+  border: 1px solid color-mix(in oklch, var(--observer-accent) 40%, transparent);
+  border-radius: var(--observer-radius);
+  cursor: pointer;
+}
+
+/* ---- Controls ----------------------------------------------------- */
+
+.observer-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.observer-search,
+.observer-select {
+  padding: 7px 10px;
+  font-size: 12px;
+  color: var(--observer-text);
+  background: var(--observer-surface);
+  border: 1px solid var(--observer-line);
+  border-radius: var(--observer-radius);
+}
+
+.observer-search {
+  flex: 1;
+  min-width: 160px;
+  font-family: var(--observer-font-chrome);
+}
+
+.observer-select {
+  cursor: pointer;
+}
+
+.observer-segmented {
+  display: inline-flex;
+  border: 1px solid var(--observer-line);
+  border-radius: var(--observer-radius);
+  overflow: hidden;
+}
+
+.observer-segmented-wrap {
+  flex-wrap: wrap;
+}
+
+.observer-segmented button {
+  padding: 7px 11px;
+  font-family: var(--observer-font-chrome);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--observer-text-muted);
+  background: transparent;
+  border: none;
+  border-inline-end: 1px solid var(--observer-line);
+  cursor: pointer;
+  transition: color var(--observer-dur-fast) var(--observer-ease);
+}
+
+.observer-segmented button:last-child {
+  border-inline-end: none;
+}
+
+.observer-segmented button:hover {
+  color: var(--observer-text);
+}
+
+.observer-segmented button[data-active="true"] {
+  color: var(--observer-accent);
+  background: color-mix(in oklch, var(--observer-accent) 12%, transparent);
+}
+
+.observer-button {
+  display: inline-block;
+  padding: 8px 16px;
+  font-family: var(--observer-font-chrome);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--observer-accent);
+  background: transparent;
+  border: 1px solid color-mix(in oklch, var(--observer-accent) 45%, transparent);
+  border-radius: var(--observer-radius);
+  cursor: pointer;
+}
+
+/* ---- Stat bar ----------------------------------------------------- */
+
+.observer-statbar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 1px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.observer-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 14px;
+  box-shadow: 1px 0 0 var(--observer-line);
+}
+
+.observer-stat-label {
+  font-size: 9px;
+}
+
+.observer-stat-value {
+  font-size: 19px;
+  color: var(--observer-text);
+}
+
+/* ---- Grid + cards -------------------------------------------------- */
+
+.observer-grid {
+  display: grid;
+  gap: var(--observer-gap);
+}
+
+.observer-card {
+  --pulse: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: var(--observer-card-pad);
+  overflow: hidden;
+  /* The pulse rides a CSS custom property so GSAP can tween one value rather
+     than touching layout-affecting properties. */
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklch, var(--observer-accent) calc(var(--pulse) * 55%), transparent);
+}
+
+.observer-card::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block: 0;
+  width: 2px;
+  background: var(--status-color, var(--observer-idle));
+  opacity: 0.85;
+}
+
+.observer-card[data-status="offline"] {
+  opacity: 0.62;
+}
+
+.observer-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.observer-card-name {
+  font-family: var(--observer-font-chrome);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--observer-text);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.observer-card-name:hover {
+  color: var(--observer-accent);
+}
+
+.observer-card-region {
+  margin-inline-start: auto;
+  font-size: 9px;
+  flex: none;
+}
+
+.observer-card-gauges {
+  display: flex;
+  justify-content: space-around;
+  gap: 8px;
+}
+
+.observer-card-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 12px;
+  margin: 0;
+}
+
+.observer-card-stats > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  border-bottom: 1px dotted var(--observer-line);
+  padding-bottom: 3px;
+}
+
+.observer-card-stats dt {
+  font-size: 9px;
+}
+
+.observer-card-stats dd {
+  margin: 0;
+  font-size: 11px;
+  color: var(--observer-text);
+}
+
+.observer-card-net {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.observer-card-rates {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 11px;
+  flex: none;
+}
+
+.observer-rate-up {
+  color: var(--observer-chart-3);
+}
+.observer-rate-down {
+  color: var(--observer-accent);
+}
+
+.observer-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Backlit chips, not paper labels — a light fill would punch holes in a dark
+   HUD and block whatever background the operator chose. */
+.observer-tag {
+  padding: 2px 7px;
+  font-size: 9px;
+  border-radius: 99px;
+  color: var(--observer-accent);
+  background: color-mix(in oklch, var(--observer-accent) 14%, transparent);
+  border: 1px solid color-mix(in oklch, var(--observer-accent) 26%, transparent);
+}
+
+/* Compact view: gauges and sparkline are noise at this density. */
+.observer-grid[data-compact="true"] .observer-card-gauges,
+.observer-grid[data-compact="true"] .observer-card-net,
+.observer-grid[data-compact="true"] .observer-card-tags {
+  display: none;
+}
+
+.observer-grid[data-compact="true"] .observer-card {
+  gap: 8px;
+}
+
+/* ---- Gauge --------------------------------------------------------- */
+
+.observer-gauge {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.observer-gauge svg {
+  display: block;
+  overflow: visible;
+}
+
+.observer-gauge-track {
+  fill: none;
+  stroke: var(--observer-track);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.observer-gauge-arc {
+  fill: none;
+  stroke: var(--observer-accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.observer-gauge[data-level="warn"] .observer-gauge-arc {
+  stroke: var(--observer-warn);
+}
+.observer-gauge[data-level="bad"] .observer-gauge-arc {
+  stroke: var(--observer-bad);
+}
+
+.observer-gauge-center {
+  position: absolute;
+  inset-block-start: 0;
+  block-size: calc(100% - 14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  pointer-events: none;
+}
+
+.observer-gauge-value {
+  font-size: 14px;
+  color: var(--observer-text);
+}
+
+.observer-gauge-unit {
+  font-size: 9px;
+  color: var(--observer-text-faint);
+}
+
+.observer-gauge-label {
+  margin-top: 2px;
+  font-size: 9px;
+}
+
+/* ---- Sparkline ----------------------------------------------------- */
+
+.observer-spark {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+}
+
+.observer-spark-line {
+  fill: none;
+  stroke: var(--observer-accent);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+
+.observer-spark-area {
+  fill: color-mix(in oklch, var(--observer-accent) 16%, transparent);
+  stroke: none;
+}
+
+/* ---- Table --------------------------------------------------------- */
+
+.observer-tablewrap {
+  /* Wide tables scroll inside their own container; the page body must never
+     scroll horizontally. */
+  overflow-x: auto;
+}
+
+.observer-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.observer-table th,
+.observer-table td {
+  padding: 9px 12px;
+  text-align: start;
+  white-space: nowrap;
+}
+
+.observer-table thead th {
+  font-size: 9px;
+  border-bottom: 1px solid var(--observer-line);
+  position: sticky;
+  top: 0;
+  background: var(--observer-surface-raised);
+  backdrop-filter: blur(8px);
+}
+
+.observer-table tbody tr {
+  border-bottom: 1px solid var(--observer-line);
+}
+
+.observer-table tbody tr:hover {
+  background: color-mix(in oklch, var(--observer-accent) 6%, transparent);
+}
+
+.observer-table tbody tr[data-status="offline"] {
+  opacity: 0.55;
+}
+
+.observer-th-status {
+  width: 24px;
+}
+
+.observer-table-name {
+  color: var(--observer-text);
+  text-decoration: none;
+  font-family: var(--observer-font-chrome);
+}
+
+.observer-table-name:hover {
+  color: var(--observer-accent);
+}
+
+.observer-table-region {
+  margin-inline-start: 8px;
+  font-size: 9px;
+}
+
+.observer-legend-swatch {
+  display: inline-block;
+  width: 8px;
+  height: 2px;
+  margin-inline: 6px 6px;
+  vertical-align: middle;
+}
+
+/* ---- Detail -------------------------------------------------------- */
+
+.observer-detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.observer-back {
+  text-decoration: none;
+  color: var(--observer-text-muted);
+}
+
+.observer-back:hover {
+  color: var(--observer-accent);
+}
+
+.observer-detail-title {
+  margin: 0;
+  font-family: var(--observer-font-chrome);
+  font-size: 20px;
+  letter-spacing: 0.03em;
+}
+
+.observer-detail-live {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-inline-start: auto;
+}
+
+.observer-detail-uptime {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.observer-detail-uptime .metric {
+  font-size: 14px;
+}
+
+.observer-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--observer-gap);
+}
+
+.observer-infopanel {
+  padding: var(--observer-card-pad);
+}
+
+.observer-infopanel h2 {
+  margin: 0 0 10px;
+  font-size: 10px;
+}
+
+.observer-infopanel dl {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.observer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 12px;
+  border-bottom: 1px dotted var(--observer-line);
+  padding-bottom: 4px;
+}
+
+.observer-row dt {
+  font-size: 9px;
+  flex: none;
+}
+
+.observer-row dd {
+  margin: 0;
+  text-align: end;
+  word-break: break-word;
+  color: var(--observer-text);
+}
+
+.observer-row[data-warn="true"] dd {
+  color: var(--observer-warn);
+}
+
+.observer-row-note {
+  color: var(--observer-text-faint);
+  font-size: 10px;
+}
+
+/* ---- Charts -------------------------------------------------------- */
+
+.observer-history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--observer-gap);
+}
+
+.observer-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.observer-history-head h2 {
+  margin: 0;
+  font-size: 11px;
+}
+
+.observer-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: var(--observer-gap);
+}
+
+.observer-chartblock {
+  padding: var(--observer-card-pad);
+}
+
+.observer-chartblock h2,
+.observer-chartblock h3 {
+  margin: 0 0 10px;
+  font-size: 10px;
+}
+
+/* Measured by a ResizeObserver so the SVG viewBox can be 1:1 with pixels —
+   see the note in LineChart.tsx about axis-label legibility. */
+.observer-chart-host {
+  width: 100%;
+}
+
+.observer-chart {
+  display: block;
+  overflow: visible;
+}
+
+.observer-chart-grid {
+  stroke: var(--observer-line);
+  stroke-width: 1;
+}
+
+.observer-chart-tick {
+  fill: var(--observer-text-faint);
+  font-family: var(--observer-font-metric);
+  font-size: 10px;
+}
+
+.observer-chart-empty {
+  padding: 30px;
+  text-align: center;
+}
+
+.observer-note {
+  margin: 10px 0 0;
+  font-size: 9px;
+  color: var(--observer-text-faint);
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+/* ---- Uptime -------------------------------------------------------- */
+
+.observer-uptime {
+  padding: var(--observer-card-pad);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.observer-uptime-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 160px) 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.observer-uptime-name {
+  font-family: var(--observer-font-chrome);
+  font-size: 11px;
+  color: var(--observer-text);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.observer-uptime-strip {
+  display: flex;
+  gap: 2px;
+  min-width: 0;
+}
+
+.observer-uptime-slot {
+  flex: 1;
+  min-width: 2px;
+  height: 20px;
+  border-radius: 1px;
+  background: var(--observer-idle);
+}
+
+.observer-uptime-slot[data-slot="online"] {
+  background: var(--observer-ok);
+}
+.observer-uptime-slot[data-slot="offline"] {
+  background: var(--observer-bad);
+}
+.observer-uptime-slot[data-slot="unknown"] {
+  background: var(--observer-track);
+}
+
+.observer-uptime-pct {
+  font-size: 12px;
+}
+
+/* ---- Boot / notices ------------------------------------------------ */
+
+.observer-boot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 96px 0;
+}
+
+.observer-boot-bar {
+  width: 180px;
+  height: 1px;
+  background: var(--observer-line);
+  position: relative;
+  overflow: hidden;
+}
+
+.observer-boot-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: var(--observer-accent);
+  animation: observer-scan 1.3s var(--observer-ease) infinite;
+}
+
+@keyframes observer-scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+.observer-notice {
+  max-width: 460px;
+  margin: 64px auto;
+  padding: 28px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.observer-notice h2 {
+  margin: 0;
+  font-family: var(--observer-font-chrome);
+  font-size: 14px;
+  letter-spacing: 0.05em;
+}
+
+.observer-notice p {
+  margin: 0;
+  color: var(--observer-text-muted);
+}
+
+.observer-notice-detail {
+  font-size: 11px;
+  color: var(--observer-text-faint);
+  word-break: break-word;
+}
+
+.observer-empty {
+  padding: 48px 0;
+  text-align: center;
+  color: var(--observer-text-muted);
+}
+
+/* ---- Footer -------------------------------------------------------- */
+
+.observer-footer {
+  margin-top: auto;
+}
+
+.observer-footer-inner {
+  max-width: var(--observer-content-max);
+  margin: 0 auto;
+  padding: 16px 20px 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  justify-content: center;
+  font-size: 9px;
+}
+
+.observer-footer-sep {
+  opacity: 0.4;
+}
+
+/* ---- Narrow screens ------------------------------------------------ */
+
+@media (max-width: 640px) {
+  .observer-main {
+    padding-inline: 12px;
+  }
+  .observer-header-inner {
+    padding-inline: 12px;
+    gap: 12px;
+  }
+  .observer-detail-live {
+    margin-inline-start: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .observer-uptime-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .observer-card-stats {
+    grid-template-columns: 1fr;
+  }
+}

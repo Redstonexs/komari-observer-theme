@@ -1,0 +1,154 @@
+{
+  "nav": {
+    "dashboard": "節點",
+    "ping": "延遲",
+    "uptime": "線上率",
+    "back": "返回節點清單"
+  },
+  "stat": {
+    "nodes": "節點總數",
+    "online": "線上",
+    "offline": "離線",
+    "cpu": "平均 CPU",
+    "memory": "記憶體",
+    "traffic": "流量",
+    "network": "網速",
+    "regions": "地區"
+  },
+  "card": {
+    "cpu": "CPU",
+    "memory": "記憶體",
+    "disk": "磁碟",
+    "swap": "置換",
+    "load": "負載",
+    "temp": "溫度",
+    "network": "網路",
+    "uptime": "運行",
+    "process": "行程",
+    "connections": "連線",
+    "gpu": "GPU",
+    "offline": "離線",
+    "online": "線上",
+    "noData": "暫無資料"
+  },
+  "status": {
+    "online": "線上",
+    "offline": "離線",
+    "degraded": "降級",
+    "unhealthy": "異常"
+  },
+  "link": {
+    "connecting": "連線中",
+    "live": "即時",
+    "degraded": "降級",
+    "stale": "資料過期",
+    "offline": "已中斷",
+    "tier": "傳輸通道",
+    "lastUpdate": "最後更新",
+    "explain": "連線不穩時，Observer 會在 WebSocket、SSE 與 HTTP 之間自動降級。"
+  },
+  "view": {
+    "grid": "卡片",
+    "table": "表格",
+    "compact": "緊湊",
+    "search": "搜尋節點",
+    "allGroups": "全部群組",
+    "sortBy": "排序",
+    "sort": {
+      "default": "預設",
+      "name": "名稱",
+      "cpu": "CPU",
+      "memory": "記憶體",
+      "disk": "磁碟",
+      "network": "網路",
+      "uptime": "運行時間"
+    },
+    "empty": "沒有符合目前篩選條件的節點。",
+    "noNodes": "尚未註冊任何節點。"
+  },
+  "detail": {
+    "hardware": "硬體",
+    "system": "系統",
+    "network": "網路",
+    "billing": "帳單",
+    "history": "歷史",
+    "cpuModel": "處理器",
+    "cores": "核心數",
+    "arch": "架構",
+    "virtualization": "虛擬化",
+    "gpuModel": "顯示卡",
+    "os": "作業系統",
+    "kernel": "核心",
+    "region": "地區",
+    "group": "群組",
+    "tags": "標籤",
+    "memory": "記憶體",
+    "swap": "置換空間",
+    "disk": "磁碟",
+    "totalUp": "累計上傳",
+    "totalDown": "累計下載",
+    "trafficLimit": "流量限額",
+    "price": "價格",
+    "expires": "到期",
+    "expired": "已過期",
+    "inDays": "{{count}} 天後",
+    "notFound": "該節點不存在或對你不可見。",
+    "range": "時間範圍",
+    "hours": "{{count}} 小時",
+    "days": "{{count}} 天",
+    "noHistory": "該時間範圍內沒有歷史紀錄。",
+    "historyDisabled": "該伺服器已關閉歷史紀錄。"
+  },
+  "ping": {
+    "title": "延遲",
+    "task": "探測任務",
+    "noTasks": "沒有設定公開的探測任務。",
+    "loss": "丟包",
+    "avg": "平均",
+    "min": "最小",
+    "max": "最大",
+    "lossNote": "線段中的斷口表示丟包，而非零延遲。",
+    "selectNodes": "節點"
+  },
+  "uptime": {
+    "title": "線上率",
+    "note": "每個方塊代表一個時間片，該時間片內沒有任何回報即判定為離線。",
+    "availability": "可用率",
+    "slotOnline": "線上",
+    "slotOffline": "離線",
+    "slotUnknown": "無資料"
+  },
+  "settings": {
+    "title": "顯示",
+    "appearance": "外觀",
+    "light": "淺色",
+    "dark": "深色",
+    "system": "跟隨系統",
+    "language": "語言",
+    "background": "背景",
+    "bgDefault": "站台預設",
+    "bgNone": "無",
+    "bgAurora": "極光",
+    "bgStarfield": "星空",
+    "bgGrid": "格線",
+    "bgCustom": "自訂圖片網址",
+    "bgApply": "套用",
+    "bgReset": "重設"
+  },
+  "boot": {
+    "initializing": "初始化中",
+    "linking": "建立連線",
+    "ready": "就緒"
+  },
+  "error": {
+    "title": "無法連線伺服器",
+    "retry": "重試",
+    "privateSite": "此監控面板為私有。",
+    "loginPrompt": "登入後檢視節點。",
+    "login": "登入"
+  },
+  "footer": {
+    "poweredBy": "Powered by Komari Monitor.",
+    "theme": "Observer"
+  }
+}

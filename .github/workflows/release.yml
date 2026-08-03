@@ -1,0 +1,100 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # The tag is the source of truth for the version. The theme market
+      # rejects a package whose manifest version disagrees with its catalog
+      # entry, so sync it here rather than relying on the committed value.
+      - name: Sync version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if ! printf '%s' "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.]+)?$'; then
+            echo "::error::Tag '$GITHUB_REF_NAME' is not a valid version"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+          node -e '
+            const fs = require("fs");
+            const version = process.env.VERSION;
+            const manifest = JSON.parse(fs.readFileSync("komari-theme.json", "utf8"));
+            manifest.version = version;
+            fs.writeFileSync("komari-theme.json", JSON.stringify(manifest, null, 2) + "\n");
+            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            pkg.version = version;
+            fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
+          '
+          echo "Manifest version -> $VERSION"
+
+      - name: Typecheck
+        run: pnpm exec tsc -b
+
+      - name: Build
+        run: pnpm build
+
+      - name: Verify theme package contract
+        run: pnpm verify
+
+      # The manifest must sit at the ARCHIVE ROOT — Komari looks up the entry
+      # name "komari-theme.json" exactly, so a wrapping folder breaks the upload.
+      - name: Package
+        run: |
+          ZIP="komari-theme-observer.zip"
+          rm -rf theme-package "$ZIP"
+          mkdir -p theme-package
+          cp komari-theme.json preview.png theme-package/
+          cp -r dist theme-package/dist
+          (cd theme-package && zip -qr "../$ZIP" .)
+          echo "ZIP=$ZIP" >> "$GITHUB_ENV"
+          echo "SHA256=$(sha256sum "$ZIP" | cut -d' ' -f1)" >> "$GITHUB_ENV"
+          unzip -l "$ZIP"
+
+      - name: Changelog
+        run: |
+          git fetch --force --tags --prune
+          PREVIOUS=$(git describe --tags --abbrev=0 --match 'v*' "${GITHUB_REF_NAME}^" 2>/dev/null || true)
+          if [ -n "$PREVIOUS" ]; then
+            LOG=$(git log --no-merges --pretty=format:'- %s (%h)' "${PREVIOUS}..${GITHUB_REF_NAME}")
+          else
+            LOG=$(git log --no-merges --pretty=format:'- %s (%h)' "${GITHUB_REF_NAME}")
+          fi
+          {
+            echo 'CHANGELOG<<__EOF__'
+            echo "$LOG"
+            echo ""
+            echo "SHA-256 \`${SHA256}\`"
+            echo '__EOF__'
+          } >> "$GITHUB_ENV"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Observer ${{ env.VERSION }}
+          body: ${{ env.CHANGELOG }}
+          files: ${{ env.ZIP }}

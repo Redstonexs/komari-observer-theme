@@ -1,0 +1,411 @@
+@import "tailwindcss";
+
+/* =====================================================================
+   Observer — design tokens
+
+   Dark-first. One luminous accent carries status, focus and charts;
+   everything else is a neutral ramp and a hairline.
+
+   Colours are oklch so the light/dark pairs can be tuned by lightness
+   without hue drift. Note the deliberate asymmetry: dark-mode muted text and
+   chart strokes sit MUCH higher in lightness than their light-mode
+   counterparts, because 1px strokes and 12px labels vanish on a near-black
+   field — especially over a user-supplied background photo.
+   ===================================================================== */
+
+@theme {
+  --font-sans: "Inter var", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code", ui-monospace, monospace;
+}
+
+:root {
+  /* ---- Type roles -------------------------------------------------
+     Three explicit roles, not one font. Chrome is mono for the machine
+     register; metrics are mono AND tabular so digits do not jitter on
+     every tick; prose is a humanist sans. */
+  --observer-font-chrome: var(--font-mono);
+  --observer-font-metric: var(--font-mono);
+  --observer-font-prose: var(--font-sans);
+
+  /* ---- Geometry --------------------------------------------------- */
+  --observer-radius: 4px;
+  --observer-hairline: 1px;
+  --observer-gap: 14px;
+  --observer-card-pad: 16px;
+  --observer-content-max: 1600px;
+
+  /* ---- Motion ----------------------------------------------------- */
+  --observer-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --observer-dur-fast: 140ms;
+  --observer-dur: 260ms;
+
+  /* ---- Background compositing -------------------------------------
+     Driven from JS by the Background component. */
+  --observer-bg-blur: 0px;
+  --observer-bg-scrim: 0.4;
+  --observer-bg-fade: 1;
+}
+
+/* Density scales the two numbers that actually change perceived density. */
+:root[data-density="compact"] {
+  --observer-gap: 10px;
+  --observer-card-pad: 12px;
+}
+:root[data-density="spacious"] {
+  --observer-gap: 20px;
+  --observer-card-pad: 22px;
+}
+
+/* ---------------------------------------------------------------------
+   Dark (default)
+   --------------------------------------------------------------------- */
+:root,
+:root[data-appearance="dark"] {
+  color-scheme: dark;
+
+  --observer-bg: oklch(0.16 0.012 250);
+  --observer-bg-deep: oklch(0.12 0.014 250);
+  --observer-surface: oklch(0.21 0.014 250 / 0.72);
+  --observer-surface-solid: oklch(0.21 0.014 250);
+  --observer-surface-raised: oklch(0.25 0.016 250 / 0.82);
+  --observer-line: oklch(0.72 0.02 250 / 0.16);
+  --observer-line-strong: oklch(0.78 0.03 250 / 0.3);
+
+  --observer-text: oklch(0.96 0.005 250);
+  /* Raised well above a "normal" dark muted value — 12px labels over a
+     decorative background are the first thing to become unreadable. */
+  --observer-text-muted: oklch(0.76 0.015 250);
+  --observer-text-faint: oklch(0.62 0.015 250);
+
+  --observer-track: oklch(0.72 0.02 250 / 0.14);
+  --observer-scrim: 0 0% 0%;
+
+  --observer-ok: oklch(0.82 0.16 165);
+  --observer-warn: oklch(0.85 0.15 85);
+  --observer-bad: oklch(0.72 0.19 22);
+  --observer-idle: oklch(0.62 0.015 250);
+
+  --observer-glow-alpha: 0.5;
+}
+
+/* ---------------------------------------------------------------------
+   Light
+   --------------------------------------------------------------------- */
+:root[data-appearance="light"] {
+  color-scheme: light;
+
+  --observer-bg: oklch(0.97 0.004 250);
+  --observer-bg-deep: oklch(0.94 0.006 250);
+  --observer-surface: oklch(1 0 0 / 0.78);
+  --observer-surface-solid: oklch(1 0 0);
+  --observer-surface-raised: oklch(1 0 0 / 0.92);
+  --observer-line: oklch(0.42 0.02 250 / 0.16);
+  --observer-line-strong: oklch(0.36 0.03 250 / 0.28);
+
+  --observer-text: oklch(0.24 0.015 250);
+  --observer-text-muted: oklch(0.46 0.018 250);
+  --observer-text-faint: oklch(0.58 0.015 250);
+
+  --observer-track: oklch(0.42 0.02 250 / 0.12);
+  --observer-scrim: 0 0% 100%;
+
+  --observer-ok: oklch(0.58 0.15 165);
+  --observer-warn: oklch(0.66 0.15 75);
+  --observer-bad: oklch(0.56 0.2 25);
+  --observer-idle: oklch(0.62 0.012 250);
+
+  --observer-glow-alpha: 0.28;
+}
+
+/* ---------------------------------------------------------------------
+   Accents — one luminous hue at a time.
+   Dark gets the higher-lightness variant for the same reason as above.
+   --------------------------------------------------------------------- */
+:root[data-accent="cyan"] { --observer-accent: oklch(0.84 0.14 200); --observer-accent-deep: oklch(0.62 0.14 200); }
+:root[data-accent="ice"] { --observer-accent: oklch(0.85 0.11 240); --observer-accent-deep: oklch(0.62 0.15 250); }
+:root[data-accent="mint"] { --observer-accent: oklch(0.86 0.15 165); --observer-accent-deep: oklch(0.6 0.14 165); }
+:root[data-accent="amber"] { --observer-accent: oklch(0.85 0.14 80); --observer-accent-deep: oklch(0.66 0.15 65); }
+:root[data-accent="violet"] { --observer-accent: oklch(0.8 0.14 295); --observer-accent-deep: oklch(0.58 0.18 295); }
+:root[data-accent="rose"] { --observer-accent: oklch(0.8 0.15 15); --observer-accent-deep: oklch(0.6 0.19 18); }
+
+:root[data-appearance="light"] {
+  --observer-accent: var(--observer-accent-deep);
+}
+
+/* Chart ramp — 9 slots rather than the conventional 5, because a fleet view
+   routinely overlays more series than a typical chart. */
+:root {
+  --observer-chart-1: var(--observer-accent);
+  --observer-chart-2: oklch(0.82 0.13 165);
+  --observer-chart-3: oklch(0.84 0.13 85);
+  --observer-chart-4: oklch(0.78 0.15 300);
+  --observer-chart-5: oklch(0.76 0.16 25);
+  --observer-chart-6: oklch(0.84 0.11 240);
+  --observer-chart-7: oklch(0.8 0.12 130);
+  --observer-chart-8: oklch(0.82 0.12 50);
+  --observer-chart-9: oklch(0.74 0.13 330);
+}
+:root[data-appearance="light"] {
+  --observer-chart-2: oklch(0.55 0.13 165);
+  --observer-chart-3: oklch(0.6 0.13 75);
+  --observer-chart-4: oklch(0.54 0.17 300);
+  --observer-chart-5: oklch(0.56 0.18 25);
+  --observer-chart-6: oklch(0.56 0.13 240);
+  --observer-chart-7: oklch(0.54 0.12 130);
+  --observer-chart-8: oklch(0.58 0.12 50);
+  --observer-chart-9: oklch(0.52 0.14 330);
+}
+
+/* =====================================================================
+   Base
+   ===================================================================== */
+
+* {
+  border-color: var(--observer-line);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--observer-bg);
+  color: var(--observer-text);
+  font-family: var(--observer-font-prose);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* THE legibility device for this genre: fixed-width digits so a value going
+   from 9.8 to 10.2 does not shift every glyph beside it. */
+.metric {
+  font-family: var(--observer-font-metric);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  letter-spacing: -0.01em;
+}
+
+.chrome {
+  font-family: var(--observer-font-chrome);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--observer-text-muted);
+}
+
+.hairline {
+  border: var(--observer-hairline) solid var(--observer-line);
+}
+
+/* =====================================================================
+   Background layers
+
+   These live outside #root (see index.html) so React never remounts them —
+   remounting would restart a video decoder or re-download an image on every
+   route change.
+   ===================================================================== */
+
+#observer-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+#observer-bg-media,
+#observer-bg-media > img,
+#observer-bg-media > video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#observer-bg-media {
+  opacity: var(--observer-bg-fade);
+  filter: blur(var(--observer-bg-blur));
+  /* Mandatory with blur: filter samples transparent pixels outside the
+     element box, which vignettes the edges. Scaling up pushes the artefact
+     off-screen. */
+  transform: scale(1.1);
+  transition: opacity 600ms var(--observer-ease);
+}
+
+#observer-bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* The adaptive scrim. Without it, glass surfaces over an arbitrary user photo
+   are a coin flip for contrast — every theme in this ecosystem shipped an
+   escape-hatch setting only after that broke in the field. */
+#observer-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 120% 80% at 50% 0%,
+      hsl(var(--observer-scrim) / calc(var(--observer-bg-scrim) * 0.55)) 0%,
+      transparent 70%
+    ),
+    linear-gradient(
+      to bottom,
+      hsl(var(--observer-scrim) / var(--observer-bg-scrim)) 0%,
+      hsl(var(--observer-scrim) / calc(var(--observer-bg-scrim) * 0.85)) 100%
+    );
+}
+
+/* Instrument grid. Two frequencies read as a measuring surface rather than
+   graph paper; the radial mask keeps it from tiling flatly to the edges. */
+:root[data-grid="on"] #observer-bg-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--observer-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--observer-line) 1px, transparent 1px),
+    linear-gradient(to right, var(--observer-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--observer-line) 1px, transparent 1px);
+  background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
+  opacity: 0.5;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, black 20%, transparent 80%);
+}
+
+/* =====================================================================
+   Surfaces
+   ===================================================================== */
+
+.panel {
+  background: var(--observer-surface);
+  border: var(--observer-hairline) solid var(--observer-line);
+  border-radius: var(--observer-radius);
+  backdrop-filter: blur(14px) saturate(1.2);
+}
+
+/* backdrop-filter is genuinely expensive on mobile GPUs. Degrade the effect
+   rather than the layout. */
+@media (max-width: 640px) {
+  .panel {
+    backdrop-filter: blur(6px);
+    background: var(--observer-surface-raised);
+  }
+}
+
+.panel-raised {
+  background: var(--observer-surface-raised);
+}
+
+:root[data-glow="on"] .glow-accent {
+  box-shadow: 0 0 0 1px
+      color-mix(in oklch, var(--observer-accent) 30%, transparent),
+    0 0 24px -6px
+      color-mix(in oklch, var(--observer-accent) calc(var(--observer-glow-alpha) * 100%), transparent);
+}
+
+/* =====================================================================
+   Status encoding — never colour alone.
+   Each state pairs a hue with a distinct glyph, and every consumer also
+   renders a text label.
+   ===================================================================== */
+
+[data-status="online"] { --status-color: var(--observer-ok); }
+[data-status="warn"] { --status-color: var(--observer-warn); }
+[data-status="bad"] { --status-color: var(--observer-bad); }
+[data-status="offline"] { --status-color: var(--observer-idle); }
+
+.status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--status-color, var(--observer-idle));
+  flex: none;
+}
+:root[data-glow="on"] [data-status="online"] .status-dot {
+  box-shadow: 0 0 8px color-mix(in oklch, var(--observer-ok) 70%, transparent);
+}
+
+/* =====================================================================
+   Accessibility
+
+   Two independent axes, which almost no theme in this ecosystem separates:
+     - reduced motion  -> stop animating, keep the decoration
+     - increased contrast -> strip the decoration, keep the motion
+   ===================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --observer-surface: var(--observer-surface-solid);
+    --observer-surface-raised: var(--observer-surface-solid);
+    --observer-line: currentColor;
+    --observer-bg-scrim: 0.85;
+  }
+  .panel {
+    backdrop-filter: none;
+  }
+  #observer-bg-overlay::after,
+  #observer-bg-canvas {
+    display: none;
+  }
+  .glow-accent {
+    box-shadow: none !important;
+  }
+}
+
+/* Visible focus that survives every background. */
+:focus-visible {
+  outline: 2px solid var(--observer-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: color-mix(in oklch, var(--observer-accent) 35%, transparent);
+}
+
+/* Scrollbars, tuned to the surface rather than the OS default. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--observer-line-strong) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--observer-line-strong);
+  border-radius: 99px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
