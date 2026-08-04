@@ -29,8 +29,13 @@ catalog updates within a few minutes and the panel offers the upgrade; installin
 it replaces the theme in place. Your saved theme settings are stored in a
 separate table and survive the upgrade.
 
-Two things worth knowing:
+Three things worth knowing:
 
+- A theme is only installable once its **release exists**. The catalog carries a
+  download URL pinned to a release tag; publish `v1.json` before cutting that
+  release and the market lists Observer but fails the install with
+  `HTTP status 404`. `pnpm catalog:check` fetches every advertised package and
+  re-hashes it for exactly this reason, and CI runs it on every push.
 - Komari **caches a source for 10 minutes**. Right after a release, use the
   market's refresh control if the new version is not showing yet.
 - The server re-hashes the downloaded package and refuses to install it unless

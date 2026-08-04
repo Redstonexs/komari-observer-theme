@@ -28,8 +28,10 @@
  * Usage:
  *   node scripts/make-catalog.mjs                     # hash the local ZIP
  *   node scripts/make-catalog.mjs --sha256=<64 hex>   # CI: hash already known
+ *   node scripts/make-catalog.mjs --source-only       # listed, not installable
  *   node scripts/make-catalog.mjs --out=/tmp/v1.json
  *   node scripts/make-catalog.mjs --check             # validate, write nothing
+ *   node scripts/make-catalog.mjs --check --offline   # skip the download probe
  */
 
 import { createHash } from "node:crypto";
@@ -48,6 +50,14 @@ const args = new Map(
 const ZIP_NAME = "komari-theme-observer.zip";
 const OUT = args.get("out") ?? join(root, "v1.json");
 const CHECK = args.has("check");
+const OFFLINE = args.has("offline");
+/**
+ * Emits an entry with no `download`/`sha256`. The market treats that as a
+ * source-only listing: visible, with install disabled. It is the honest state
+ * for a repo that has no release yet — the alternative is advertising a URL that
+ * 404s, which is what a hand-committed catalog produces.
+ */
+const SOURCE_ONLY = args.has("source-only");
 
 /**
  * Translated descriptions. The English text is taken from the manifest so there
@@ -141,9 +151,11 @@ function readZipEntry(buffer, wanted) {
   return null;
 }
 
-let sha256 = (args.get("sha256") ?? "").trim().replace(/^sha256:/i, "").toLowerCase();
+let sha256 = SOURCE_ONLY
+  ? ""
+  : (args.get("sha256") ?? "").trim().replace(/^sha256:/i, "").toLowerCase();
 
-if (!sha256 && !CHECK) {
+if (!sha256 && !CHECK && !SOURCE_ONLY) {
   const zipPath = join(root, ZIP_NAME);
   if (!existsSync(zipPath)) {
     fail(
@@ -246,6 +258,53 @@ const validate = (theme) => {
   }
 };
 
+/**
+ * Fetches every advertised package and re-hashes it, exactly as the server does
+ * on install.
+ *
+ * Structural validation cannot catch the failure that actually reaches users: a
+ * catalog whose `download` points at a release that was never cut. It parses
+ * perfectly and then 404s on someone else's machine with "Failed to download
+ * theme: HTTP status 404". Committing v1.json ahead of the release is the easy
+ * way to get there, so main is checked against reality on every push.
+ *
+ * A network that is simply unreachable warns instead of failing — an offline
+ * developer should not be blocked. A definitive HTTP error is a real failure.
+ */
+async function probeDownloads(themes) {
+  for (const theme of themes) {
+    if (!theme.download) continue;
+    let response;
+    try {
+      response = await fetch(theme.download, { redirect: "follow" });
+    } catch (error) {
+      console.warn(
+        `  warn  ${theme.short}: could not reach ${theme.download} (${error.message}). ` +
+          "Skipping the download probe.",
+      );
+      continue;
+    }
+    if (!response.ok) {
+      const hint =
+        response.status === 404
+          ? ` — nothing published there. Cut the v${theme.version} release, or run ` +
+            "`pnpm catalog --source-only` until you do."
+          : "";
+      problems.push(`${theme.short}: download returned HTTP ${response.status}${hint}`);
+      continue;
+    }
+    const digest = createHash("sha256")
+      .update(Buffer.from(await response.arrayBuffer()))
+      .digest("hex");
+    if (digest !== theme.sha256) {
+      problems.push(
+        `${theme.short}: the published package hashes to ${digest}, but the catalog ` +
+          `claims ${theme.sha256}. Every install would be refused.`,
+      );
+    }
+  }
+}
+
 /* ---- merge with whatever is already published ----------------------- */
 
 let previous = null;
@@ -268,12 +327,17 @@ if (CHECK) {
   if ([...shorts].sort().join(" ") !== shorts.join(" ")) {
     problems.push("themes must be sorted by short, case-insensitively");
   }
+  if (!OFFLINE) await probeDownloads(themes);
   if (problems.length) {
     console.error(`\n✗ ${OUT} is not a valid theme market source:\n`);
     for (const p of problems) console.error(`  fail  ${p}`);
     process.exit(1);
   }
-  console.log(`✓ ${OUT} is a valid theme market source (${themes.length} theme(s))`);
+  const installable = themes.filter((t) => t.download).length;
+  console.log(
+    `✓ ${OUT} is a valid theme market source (${themes.length} theme(s), ` +
+      `${installable} installable${OFFLINE ? "; download probe skipped" : ""})`,
+  );
   process.exit(0);
 }
 
