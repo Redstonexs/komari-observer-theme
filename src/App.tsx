@@ -6,8 +6,6 @@ import { Background } from "@/components/Background";
 import { Footer, Header } from "@/components/Chrome";
 import { Dashboard } from "@/routes/Dashboard";
 import { NodeDetail } from "@/routes/NodeDetail";
-import { PingPage } from "@/routes/Ping";
-import { UptimePage } from "@/routes/Uptime";
 
 export function App() {
   useBootstrap();
@@ -34,9 +32,13 @@ export function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/node/:uuid" element={<NodeDetail />} />
-            <Route path="/ping" element={<PingPage />} />
-            <Route path="/uptime" element={<UptimePage />} />
-            {/* Komari serves index.html for unknown paths, so catch them here. */}
+            {/*
+              Komari serves index.html for unknown paths, so catch them here.
+              This also absorbs /ping and /uptime, which used to be fleet-wide
+              pages — a bookmark from an older build lands on the fleet rather
+              than a blank screen. Both metrics now live on the node detail
+              page, where they describe a single node instead of an average.
+            */}
             <Route path="*" element={<Dashboard />} />
           </Routes>
         )}

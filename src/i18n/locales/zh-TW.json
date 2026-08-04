@@ -1,8 +1,6 @@
 {
   "nav": {
     "dashboard": "節點",
-    "ping": "延遲",
-    "uptime": "線上率",
     "back": "返回節點清單"
   },
   "stat": {
@@ -101,14 +99,9 @@
   },
   "ping": {
     "title": "延遲",
-    "task": "探測任務",
-    "noTasks": "沒有設定公開的探測任務。",
     "loss": "丟包",
     "avg": "平均",
-    "min": "最小",
-    "max": "最大",
-    "lossNote": "線段中的斷口表示丟包，而非零延遲。",
-    "selectNodes": "節點"
+    "lossNote": "線段中的斷口表示丟包，而非零延遲。"
   },
   "uptime": {
     "title": "線上率",

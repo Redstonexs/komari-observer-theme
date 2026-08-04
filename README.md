@@ -61,9 +61,10 @@ over a dot-matrix world map of where the fleet actually lives.
 
 **Per-node health** — latency and availability are properties of a node, not of a
 fleet, so each detail page carries its own probe-latency chart and status-page
-availability strip alongside CPU / memory / network / load / GPU history. The
-cross-node latency and uptime pages remain for comparing nodes against each
-other.
+availability strip alongside CPU / memory / network / load / GPU history. There
+are deliberately no fleet-wide latency or uptime pages: an averaged latency
+describes no node in particular, and an averaged availability hides the one node
+that was down.
 
 **Custom backgrounds** — a built-in aurora, starfield or instrument grid needing
 no hosted asset, or your own image or video with independent light/dark sources,

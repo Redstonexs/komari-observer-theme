@@ -39,12 +39,6 @@ export function Header() {
           <NavLink to="/" end className="observer-navlink">
             {t("nav.dashboard")}
           </NavLink>
-          <NavLink to="/ping" className="observer-navlink">
-            {t("nav.ping")}
-          </NavLink>
-          <NavLink to="/uptime" className="observer-navlink">
-            {t("nav.uptime")}
-          </NavLink>
         </nav>
 
         <div className="observer-header-right" data-boot="chrome">

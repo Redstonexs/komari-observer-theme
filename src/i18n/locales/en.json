@@ -1,8 +1,6 @@
 {
   "nav": {
     "dashboard": "Fleet",
-    "ping": "Latency",
-    "uptime": "Uptime",
     "back": "Back to fleet"
   },
   "stat": {
@@ -101,14 +99,9 @@
   },
   "ping": {
     "title": "Latency",
-    "task": "Probe",
-    "noTasks": "No public probes are configured.",
     "loss": "Loss",
     "avg": "Avg",
-    "min": "Min",
-    "max": "Max",
-    "lossNote": "Gaps in a line mean lost packets, not zero latency.",
-    "selectNodes": "Nodes"
+    "lossNote": "Gaps in a line mean lost packets, not zero latency."
   },
   "uptime": {
     "title": "Uptime",

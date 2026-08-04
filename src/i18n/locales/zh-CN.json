@@ -1,8 +1,6 @@
 {
   "nav": {
     "dashboard": "节点",
-    "ping": "延迟",
-    "uptime": "在线率",
     "back": "返回节点列表"
   },
   "stat": {
@@ -101,14 +99,9 @@
   },
   "ping": {
     "title": "延迟",
-    "task": "探测任务",
-    "noTasks": "没有配置公开的探测任务。",
     "loss": "丢包",
     "avg": "平均",
-    "min": "最小",
-    "max": "最大",
-    "lossNote": "线段中的断口表示丢包，而不是零延迟。",
-    "selectNodes": "节点"
+    "lossNote": "线段中的断口表示丢包，而不是零延迟。"
   },
   "uptime": {
     "title": "在线率",
