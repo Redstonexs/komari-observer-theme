@@ -155,9 +155,19 @@ if (!existsSync(manifestPath)) {
     if (manifest.short && !/^[A-Za-z0-9_-]+$/.test(manifest.short)) {
       fail("komari-theme.json: `short` may only contain letters, digits, underscore and hyphen — it is used as a directory name.");
     }
-    // purcarte ships a "tags:VERSION" placeholder for CI to substitute; the
-    // market validator rejects a manifest whose version disagrees with the tag.
-    if (typeof manifest.version === "string" && /^tags?:/i.test(manifest.version)) {
+    if (!manifest.author) fail("komari-theme.json: `author` is required.");
+    // A release job that rewrites the version from the tag can DELETE this key
+    // instead of setting it — JSON.stringify silently drops a field assigned
+    // `undefined`, so a mis-plumbed variable produces a manifest that is valid
+    // JSON, builds cleanly, and is refused at install time. Assert presence
+    // rather than only checking the value's shape.
+    if (!manifest.version) {
+      fail("komari-theme.json: `version` is required — it is missing or empty.");
+    } else if (typeof manifest.version !== "string") {
+      fail("komari-theme.json: `version` must be a string.");
+    } else if (/^tags?:/i.test(manifest.version)) {
+      // purcarte ships a "tags:VERSION" placeholder for CI to substitute; the
+      // market validator rejects a manifest whose version disagrees with the tag.
       fail(`komari-theme.json: \`version\` is still the CI placeholder "${manifest.version}".`);
     }
 

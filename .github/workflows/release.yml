@@ -33,7 +33,12 @@ jobs:
       # entry, so sync it here rather than relying on the committed value.
       - name: Sync version from tag
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          # MUST be exported, not just assigned: `node -e` inherits only the
+          # environment, and $GITHUB_ENV reaches later steps but not this one.
+          # An unexported VERSION makes process.env.VERSION undefined, and
+          # JSON.stringify DROPS a key assigned undefined — so the manifest
+          # silently loses its version instead of gaining the tag's.
+          export VERSION="${GITHUB_REF_NAME#v}"
           if ! printf '%s' "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.]+)?$'; then
             echo "::error::Tag '$GITHUB_REF_NAME' is not a valid version"
             exit 1
@@ -43,14 +48,20 @@ jobs:
           node -e '
             const fs = require("fs");
             const version = process.env.VERSION;
-            const manifest = JSON.parse(fs.readFileSync("komari-theme.json", "utf8"));
-            manifest.version = version;
-            fs.writeFileSync("komari-theme.json", JSON.stringify(manifest, null, 2) + "\n");
-            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
-            pkg.version = version;
-            fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
+            if (!version) throw new Error("VERSION is not set in the environment");
+            for (const file of ["komari-theme.json", "package.json"]) {
+              const json = JSON.parse(fs.readFileSync(file, "utf8"));
+              json.version = version;
+              fs.writeFileSync(file, JSON.stringify(json, null, 2) + "\n");
+            }
           '
-          echo "Manifest version -> $VERSION"
+          node -e '
+            const version = require("./komari-theme.json").version;
+            if (version !== process.env.VERSION) {
+              throw new Error(`manifest version is ${version}, expected ${process.env.VERSION}`);
+            }
+            console.log(`Manifest version -> ${version}`);
+          '
 
       - name: Typecheck
         run: pnpm exec tsc -b
@@ -133,6 +144,9 @@ jobs:
           node -e '
             const fs = require("fs");
             const version = process.env.VERSION;
+            // Never write undefined here — JSON.stringify would drop the key and
+            // push a manifest with no version at all to main.
+            if (!version) throw new Error("VERSION is not set in the environment");
             for (const file of ["komari-theme.json", "package.json"]) {
               const json = JSON.parse(fs.readFileSync(file, "utf8"));
               json.version = version;
