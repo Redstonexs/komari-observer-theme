@@ -16,6 +16,7 @@ import { useLiveNode } from "@/hooks/useLiveNode";
 import { formatBytes, formatRate, formatUptime, parseTags } from "@/lib/format";
 import { pulse, scrambleIn } from "@/anim/gsap";
 import { Gauge, type GaugeHandle } from "./Gauge";
+import { RegionTag } from "./RegionTag";
 import { Sparkline, type SparklineHandle } from "./Sparkline";
 import { useAppStore } from "@/store/app";
 
@@ -108,7 +109,9 @@ export function NodeCard({ node }: NodeCardProps) {
         <Link ref={nameRef} to={`/node/${node.uuid}`} className="observer-card-name">
           {node.name}
         </Link>
-        {node.region && <span className="chrome observer-card-region">{node.region}</span>}
+        {node.region && (
+          <RegionTag region={node.region} className="chrome observer-card-region" />
+        )}
       </header>
 
       <div className="observer-card-gauges">

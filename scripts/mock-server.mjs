@@ -42,7 +42,10 @@ const FLAKY = args.includes("--flaky");
 
 /* ---- fixture fleet ------------------------------------------------ */
 
-const REGIONS = ["JP", "DE", "SG", "US", "GB", "AU", "FR", "CA", "NL", "KR", "BR", "IN"];
+// Region is free text. Operators type an ISO code, a non-ISO spelling, a flag
+// emoji pasted from elsewhere, or a place name that is no country at all — the
+// fixture carries all four so the client is never written against just one.
+const REGIONS = ["JP", "DE", "🇸🇬", "US", "UK", "AU", "FR", "🇨🇦", "NL", "KR", "BR", "bengaluru"];
 const OS = ["Debian 12", "Ubuntu 24.04", "Alpine 3.20", "Rocky 9", "Arch"];
 const CITIES = ["tokyo", "fra", "sgp", "nyc", "lon", "syd", "par", "yyz", "ams", "icn", "gru", "bom"];
 

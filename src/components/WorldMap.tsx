@@ -13,7 +13,8 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { COUNTRY_LATLNG, LAND, REGION_ALIASES } from "@/assets/geo";
+import { COUNTRY_LATLNG, LAND } from "@/assets/geo";
+import { regionCode } from "@/lib/region";
 import { useAppStore } from "@/store/app";
 import { useLiveFleet } from "@/hooks/useLiveNode";
 import type { NodeInfo } from "@/api/types";
@@ -34,14 +35,6 @@ const isLand = (col: number, row: number) => {
   const index = row * LAND.width + col;
   return (landBits[index >> 3]! >> (index & 7)) & 1;
 };
-
-/** Normalises an operator-typed region string to an ISO alpha-2 code. */
-export function normalizeRegion(region: string): string | null {
-  const code = region.trim().toUpperCase();
-  if (!code) return null;
-  const resolved = REGION_ALIASES[code] ?? code;
-  return COUNTRY_LATLNG[resolved] ? resolved : null;
-}
 
 interface Cluster {
   code: string;
@@ -68,7 +61,7 @@ export function WorldMap() {
   const clusters = useMemo(() => {
     const byCode = new Map<string, Cluster>();
     for (const node of nodes) {
-      const code = normalizeRegion(node.region ?? "");
+      const code = regionCode(node.region ?? "");
       if (!code) continue;
       const existing = byCode.get(code);
       if (existing) {

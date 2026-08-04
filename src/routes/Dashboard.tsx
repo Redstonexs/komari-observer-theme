@@ -5,11 +5,13 @@ import { useAppStore, type SortKey } from "@/store/app";
 import { liveBus } from "@/store/live";
 import { useFleetStructure, useLiveNode } from "@/hooks/useLiveNode";
 import { NodeCard } from "@/components/NodeCard";
+import { RegionTag } from "@/components/RegionTag";
 import { StatBar } from "@/components/StatBar";
 import { WorldMap } from "@/components/WorldMap";
 import { Flip, gsap, hasTarget, reducedMotion, revealCards } from "@/anim/gsap";
 import { diskPercent, memPercent } from "@/api/model";
 import { formatBytes, formatRate, formatUptime, parseTags } from "@/lib/format";
+import { regionCode } from "@/lib/region";
 import type { NodeInfo } from "@/api/types";
 
 export function Dashboard() {
@@ -44,6 +46,9 @@ export function Dashboard() {
       return (
         node.name.toLowerCase().includes(query) ||
         node.region?.toLowerCase().includes(query) ||
+        // A region typed as a flag emoji carries no letters to match, so search
+        // the country code it resolves to as well.
+        regionCode(node.region ?? "")?.toLowerCase().includes(query) ||
         node.group?.toLowerCase().includes(query) ||
         parseTags(node.tags).some((tag) => tag.toLowerCase().includes(query))
       );
@@ -310,7 +315,9 @@ function NodeRow({ node }: { node: NodeInfo }) {
         <Link to={`/node/${node.uuid}`} className="observer-table-name">
           {node.name}
         </Link>
-        {node.region && <span className="chrome observer-table-region">{node.region}</span>}
+        {node.region && (
+          <RegionTag region={node.region} className="chrome observer-table-region" />
+        )}
       </td>
       <td className="metric">
         <span ref={cpuRef}>—</span>

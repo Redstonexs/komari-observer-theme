@@ -8,6 +8,7 @@ import { useLiveNode } from "@/hooks/useLiveNode";
 import { LineChart, type Series } from "@/components/LineChart";
 import { Gauge, type GaugeHandle } from "@/components/Gauge";
 import { NodeLatency, NodeUptime } from "@/components/NodeHealth";
+import { RegionTag } from "@/components/RegionTag";
 import {
   daysUntil,
   formatBytes,
@@ -108,7 +109,10 @@ export function NodeDetail() {
         <InfoPanel title={t("detail.system")}>
           <Row label={t("detail.os")} value={node.os} />
           <Row label={t("detail.kernel")} value={node.kernel_version} />
-          <Row label={t("detail.region")} value={node.region} />
+          <Row
+            label={t("detail.region")}
+            value={node.region ? <RegionTag region={node.region} /> : undefined}
+          />
           <Row label={t("detail.group")} value={node.group} />
           <Row label={t("detail.tags")} value={parseTags(node.tags).join(", ")} />
           {node.public_remark && <Row label="" value={node.public_remark} />}
@@ -307,7 +311,9 @@ function LiveNetworkPanel({ uuid, node }: { uuid: string; node: NodeInfo }) {
       <RefRow label={t("detail.totalDown")} valueRef={totalDownRef} />
       <RefRow label={`${t("card.connections")} (TCP/UDP)`} valueRef={connRef} />
       <RefRow label={t("card.process")} valueRef={procRef} />
-      {node.region && <Row label={t("detail.region")} value={node.region} />}
+      {node.region && (
+        <Row label={t("detail.region")} value={<RegionTag region={node.region} />} />
+      )}
     </InfoPanel>
   );
 }
@@ -321,8 +327,10 @@ function InfoPanel({ title, children }: { title: string; children: React.ReactNo
   );
 }
 
-function Row({ label, value }: { label: string; value?: string }) {
-  if (!value) return null;
+/** `value` is a node so a row can hold a marker, not only text; an empty one
+ *  still drops the row, which is what every plain-string caller relies on. */
+function Row({ label, value }: { label: string; value?: React.ReactNode }) {
+  if (value === null || value === undefined || value === "") return null;
   return (
     <div className="observer-row">
       <dt className="chrome">{label}</dt>

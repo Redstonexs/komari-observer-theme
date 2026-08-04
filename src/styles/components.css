@@ -393,7 +393,7 @@
 
 .observer-card-region {
   margin-inline-start: auto;
-  font-size: 9px;
+  font-size: 10px;
   flex: none;
 }
 
@@ -617,7 +617,32 @@
 
 .observer-table-region {
   margin-inline-start: 8px;
-  font-size: 9px;
+  font-size: 10px;
+}
+
+/* ---- Region marker ------------------------------------------------- */
+
+/* Flag and code together, always. The flag is drawn from the system emoji font
+   and Windows carries no glyph for one, so nothing may depend on it being
+   visible — it is a fast visual key over a code that is legible on its own. */
+/* Deliberately sizeless: the marker takes the size of wherever it sits, which
+   is a 10px card label in one place and a 12px detail row in another. */
+.observer-region {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  /* The code reads as data, not as one more muted chrome label. */
+  color: var(--observer-text);
+  white-space: nowrap;
+}
+
+.observer-region-flag {
+  /* Larger than its code, and outside the chrome tracking around it: at label
+     size a flag otherwise shrinks into a smudge. */
+  font-size: 1.2em;
+  line-height: 1;
+  letter-spacing: 0;
 }
 
 .observer-legend-swatch {
