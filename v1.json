@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated_at": "2026-08-04T04:34:58.002Z",
+  "updated_at": "2026-08-04T04:53:47.088Z",
   "themes": [
     {
       "name": "Observer",
@@ -16,7 +16,7 @@
       "url": "https://github.com/Redstonexs/komari-observer-theme",
       "preview": "https://raw.githubusercontent.com/Redstonexs/komari-observer-theme/refs/heads/main/preview.png",
       "download": "https://github.com/Redstonexs/komari-observer-theme/releases/download/v0.1.0/komari-theme-observer.zip",
-      "sha256": "36e8ad70cea88fe4eec8c0ffb4f683c1e5388d142ef04933e5e3f226072bf418"
+      "sha256": "47b8a853ee155ec70479e2426754b053abe82cf89c92c00586f841ceda64eef3"
     }
   ]
 }
