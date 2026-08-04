@@ -6,6 +6,7 @@ import { liveBus } from "@/store/live";
 import { useFleetStructure, useLiveNode } from "@/hooks/useLiveNode";
 import { NodeCard } from "@/components/NodeCard";
 import { StatBar } from "@/components/StatBar";
+import { WorldMap } from "@/components/WorldMap";
 import { Flip, gsap, hasTarget, reducedMotion, revealCards } from "@/anim/gsap";
 import { diskPercent, memPercent } from "@/api/model";
 import { formatBytes, formatRate, formatUptime, parseTags } from "@/lib/format";
@@ -124,6 +125,7 @@ export function Dashboard() {
   return (
     <div className="observer-page">
       <StatBar />
+      {settings.show_map && <WorldMap />}
 
       <div className="observer-toolbar">
         <input

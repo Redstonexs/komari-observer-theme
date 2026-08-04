@@ -11,20 +11,54 @@ and a transport ladder that degrades gracefully when the connection gets rough.
 
 ## Install
 
+### From the theme market (recommended — self-updating)
+
+Observer publishes its own **theme market source**, so your instance can install
+and update it without anyone downloading a ZIP. Needs Komari **1.3.0+**, which is
+where the built-in theme market landed.
+
+In Komari: **Settings → Themes → Market → Sources → Add**, then:
+
+| Field | Value |
+| --- | --- |
+| Name | `Observer` |
+| URL | `https://raw.githubusercontent.com/Redstonexs/komari-observer-theme/main/v1.json` |
+
+Observer now appears in the market list. When a new version is released the
+catalog updates within a few minutes and the panel offers the upgrade; installing
+it replaces the theme in place. Your saved theme settings are stored in a
+separate table and survive the upgrade.
+
+Two things worth knowing:
+
+- Komari **caches a source for 10 minutes**. Right after a release, use the
+  market's refresh control if the new version is not showing yet.
+- The server re-hashes the downloaded package and refuses to install it unless
+  the digest matches the catalog, so a tampered or truncated download fails
+  closed rather than installing.
+
+### From a file
+
 1. Download `komari-theme-observer.zip` from the [releases page](../../releases).
 2. In Komari: **Settings → Themes → Upload**, then set Observer as the active theme.
 3. Configure it in the same panel — every option below is exposed there.
 
-Requires Komari **1.0.5+** for theme configuration. The richest data transport
-needs **1.0.7+**; older servers fall back automatically.
+Requires Komari **1.0.5+** for theme configuration and **1.0.7+** for the richest
+data transport; older servers fall back automatically. The theme market needs
+**1.3.0+**.
 
 ---
 
 ## What it does
 
-**Views** — card grid, dense sortable table, and a compact mode for large fleets.
-Per-node detail pages with CPU / memory / network / load / GPU history, a latency
-page, and a status-page style uptime view.
+**Views** — card grid, dense sortable table, and a compact mode for large fleets,
+over a dot-matrix world map of where the fleet actually lives.
+
+**Per-node health** — latency and availability are properties of a node, not of a
+fleet, so each detail page carries its own probe-latency chart and status-page
+availability strip alongside CPU / memory / network / load / GPU history. The
+cross-node latency and uptime pages remain for comparing nodes against each
+other.
 
 **Custom backgrounds** — a built-in aurora, starfield or instrument grid needing
 no hosted asset, or your own image or video with independent light/dark sources,
@@ -127,6 +161,7 @@ origin check. Fix it server-side (`ws_allowed_origins`, or
 pnpm build      # -> dist/
 pnpm verify     # check the package contract
 pnpm package    # -> komari-theme-observer.zip
+pnpm catalog    # -> v1.json, hashed from that ZIP
 ```
 
 `pnpm verify` guards the failure modes that are silent at build time and only
@@ -134,6 +169,18 @@ appear once installed: the three literal sentinels Komari string-replaces in
 `index.html`, asset names beginning with `_` (Go's `embed` ignores those),
 relative asset paths, a stripped GSAP licence banner, and manifest/settings
 drift. CI runs it before any release is cut.
+
+`pnpm catalog` regenerates the market source. Tagging `v*` does the whole thing
+for you — sync the version, build, verify, package, publish the release, then
+commit `v1.json` back to `main` **after** the asset exists, so a subscribed
+instance never sees a catalog pointing at a download that is not there yet. The
+generator refuses to emit an entry that Komari would reject, and validates the
+one rule with no server-side error message worth reading: the catalog `version`
+must equal the version inside the packaged manifest, or the install aborts with
+only "does not match".
+
+`scripts/make-catalog.mjs` derives the repo slug from `komari-theme.json`'s
+`url`, so a fork publishes its own source by changing that one field.
 
 `scripts/make-preview.mjs` regenerates `preview.png` from the palette. Replace it
 with a real screenshot of your own fleet when you have one.

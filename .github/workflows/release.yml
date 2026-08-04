@@ -75,6 +75,21 @@ jobs:
           echo "SHA256=$(sha256sum "$ZIP" | cut -d' ' -f1)" >> "$GITHUB_ENV"
           unzip -l "$ZIP"
 
+      # The market source has to describe the artifact that is about to be
+      # published, so it is generated from the real ZIP's digest — never from a
+      # guess. Written outside the worktree because the publish step below
+      # checks out main and would otherwise wipe it.
+      - name: Build theme market source
+        run: |
+          # Seed from the published catalog, not from the tag's copy, so any
+          # entry added to main since the tag was cut survives the update.
+          git fetch --no-tags --depth=1 origin main || true
+          git show origin/main:v1.json > "$RUNNER_TEMP/v1.json" 2>/dev/null || true
+          [ -s "$RUNNER_TEMP/v1.json" ] || rm -f "$RUNNER_TEMP/v1.json"
+
+          node scripts/make-catalog.mjs --sha256="$SHA256" --out="$RUNNER_TEMP/v1.json"
+          cat "$RUNNER_TEMP/v1.json"
+
       - name: Changelog
         run: |
           git fetch --force --tags --prune
@@ -98,3 +113,37 @@ jobs:
           name: Observer ${{ env.VERSION }}
           body: ${{ env.CHANGELOG }}
           files: ${{ env.ZIP }}
+
+      # Runs LAST and only after the asset exists: the catalog advertises a
+      # download URL and a checksum, so publishing it before the release would
+      # point every subscribed instance at a 404 for as long as the job took.
+      #
+      # If this step fails (branch protection, for instance), the release is
+      # still good — recover with `pnpm package && pnpm catalog` and commit.
+      - name: Publish market source to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --no-tags origin main
+          git checkout -B publish-catalog origin/main
+
+          cp "$RUNNER_TEMP/v1.json" v1.json
+          # Keep the committed manifest in step with the tag, so the next build
+          # from main already carries the released version.
+          node -e '
+            const fs = require("fs");
+            const version = process.env.VERSION;
+            for (const file of ["komari-theme.json", "package.json"]) {
+              const json = JSON.parse(fs.readFileSync(file, "utf8"));
+              json.version = version;
+              fs.writeFileSync(file, JSON.stringify(json, null, 2) + "\n");
+            }
+          '
+
+          if git diff --quiet -- v1.json komari-theme.json package.json; then
+            echo "Catalog and manifest already current — nothing to publish."
+            exit 0
+          fi
+          git add v1.json komari-theme.json package.json
+          git commit -m "chore: publish ${GITHUB_REF_NAME} to the theme market source"
+          git push origin publish-catalog:main

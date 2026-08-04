@@ -34,3 +34,8 @@ jobs:
       # the theme is installed on a live server. See scripts/verify-dist.mjs.
       - name: Verify theme package contract
         run: pnpm verify
+
+      # v1.json is served to other people's Komari instances as a market source.
+      # A malformed entry there fails on THEIR machine, so validate it here.
+      - name: Verify theme market source
+        run: pnpm catalog:check

@@ -13,20 +13,10 @@
    field — especially over a user-supplied background photo.
    ===================================================================== */
 
-@theme {
-  --font-sans: "Inter var", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code", ui-monospace, monospace;
-}
+/* The three type roles (chrome / metric / prose) and their @font-face rules
+   live in fonts.css, which also handles CJK fallback and spacing. */
 
 :root {
-  /* ---- Type roles -------------------------------------------------
-     Three explicit roles, not one font. Chrome is mono for the machine
-     register; metrics are mono AND tabular so digits do not jitter on
-     every tick; prose is a humanist sans. */
-  --observer-font-chrome: var(--font-mono);
-  --observer-font-metric: var(--font-mono);
-  --observer-font-prose: var(--font-sans);
-
   /* ---- Geometry --------------------------------------------------- */
   --observer-radius: 4px;
   --observer-hairline: 1px;
@@ -86,6 +76,9 @@
   --observer-idle: oklch(0.62 0.015 250);
 
   --observer-glow-alpha: 0.5;
+
+  /* Land dots sit just above the page field — present, never competing with data. */
+  --observer-map-dot: oklch(0.72 0.02 250 / 0.3);
 }
 
 /* ---------------------------------------------------------------------
@@ -115,6 +108,7 @@
   --observer-idle: oklch(0.62 0.012 250);
 
   --observer-glow-alpha: 0.28;
+  --observer-map-dot: oklch(0.42 0.02 250 / 0.28);
 }
 
 /* ---------------------------------------------------------------------

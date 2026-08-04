@@ -966,3 +966,211 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- World map ------------------------------------------------------ */
+
+.observer-map {
+  display: flex;
+  justify-content: center;
+  padding: var(--observer-card-pad);
+  overflow: hidden;
+}
+
+.observer-map-inner {
+  position: relative;
+  flex: none;
+}
+
+.observer-map canvas {
+  display: block;
+}
+
+.observer-map-markers {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.observer-marker {
+  cursor: pointer;
+}
+
+.observer-marker-dot {
+  fill: var(--status-color, var(--observer-idle));
+  stroke: var(--observer-bg);
+  stroke-width: 1.5;
+}
+
+/* The halo is what makes a marker read as a live beacon rather than a pin. */
+.observer-marker-halo {
+  fill: var(--status-color, var(--observer-idle));
+  opacity: 0.16;
+  transform-origin: center;
+}
+
+:root[data-glow="on"] .observer-marker[data-status="online"] .observer-marker-halo {
+  animation: observer-ping 2.8s var(--observer-ease) infinite;
+}
+
+@keyframes observer-ping {
+  0% { opacity: 0.3; transform: scale(0.55); }
+  70% { opacity: 0; transform: scale(1.15); }
+  100% { opacity: 0; transform: scale(1.15); }
+}
+
+.observer-marker[data-status="online"] { --status-color: var(--observer-ok); }
+.observer-marker[data-status="warn"] { --status-color: var(--observer-warn); }
+.observer-marker[data-status="offline"] { --status-color: var(--observer-bad); }
+
+.observer-marker-code {
+  fill: var(--observer-text-muted);
+  font-family: var(--observer-font-chrome);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+
+.observer-marker:hover .observer-marker-code,
+.observer-marker:focus-visible .observer-marker-code {
+  fill: var(--observer-accent);
+  opacity: 1;
+}
+
+/* Suppressed only because a neighbouring label already occupies the space —
+   still in the DOM, and revealed on hover or focus. */
+.observer-marker-code[data-crowded] {
+  opacity: 0;
+  transition: opacity var(--observer-dur-fast) var(--observer-ease);
+}
+
+/* Present for assistive tech and on hover, but silent at rest so a fleet
+   spread over 20 countries does not become a wall of numbers. */
+.observer-marker-count {
+  fill: var(--observer-text-faint);
+  font-family: var(--observer-font-metric);
+  font-size: 9px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--observer-dur-fast) var(--observer-ease);
+}
+
+.observer-marker:hover .observer-marker-count,
+.observer-marker:focus-visible .observer-marker-count {
+  opacity: 1;
+}
+
+.observer-map-tip {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 18px));
+  padding: 8px 10px;
+  min-width: 110px;
+  pointer-events: none;
+  z-index: 5;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.observer-map-tip strong {
+  color: var(--observer-accent);
+}
+
+.observer-map-tip ul {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+@media (max-width: 640px) {
+  /* The map is decorative context, not data you can act on at phone width. */
+  .observer-map {
+    display: none;
+  }
+}
+
+/* ---- Per-node health (latency + availability) ----------------------- */
+
+/* Wider minimum than the resource charts: a latency block carries a legend
+   row per probe, and an availability strip needs room for its slots. */
+.observer-health {
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  /* The availability strip is a fraction of the latency chart's height; letting
+     it stretch to match leaves most of its panel empty. */
+  align-items: start;
+}
+
+/* The head is shared with the history section, where the title is an h2. */
+.observer-history-head h3 {
+  margin: 0;
+  font-size: 10px;
+}
+
+.observer-pingstats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.observer-pingstat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.observer-pingstat .status-dot {
+  margin-inline-start: auto;
+}
+
+.observer-pingstat-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.observer-pingstat .metric {
+  font-size: 11px;
+  color: var(--observer-text-muted);
+  white-space: nowrap;
+}
+
+.observer-pingstat-avg {
+  color: var(--observer-text) !important;
+}
+
+/* min / max is supporting detail — present, but not competing with the average. */
+.observer-pingstat-range {
+  color: var(--observer-text-faint) !important;
+  font-size: 10px !important;
+}
+
+.observer-uptime-head-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Only one node's history is on screen here, so the slots can be tall enough
+   to actually read rather than the 20px used for a stacked fleet list. */
+.observer-uptime-strip-lg {
+  margin-top: 12px;
+}
+
+.observer-uptime-strip-lg .observer-uptime-slot {
+  height: 30px;
+  border-radius: 2px;
+}
+
+@media (max-width: 640px) {
+  .observer-health {
+    grid-template-columns: 1fr;
+  }
+  .observer-pingstat-range {
+    display: none;
+  }
+}

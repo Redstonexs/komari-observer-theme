@@ -16,12 +16,22 @@
     },
     "data": [
       {
-        "name": { "en": "View", "zh-CN": "视图", "zh-TW": "檢視", "ja": "表示" },
+        "name": {
+          "en": "View",
+          "zh-CN": "视图",
+          "zh-TW": "檢視",
+          "ja": "表示"
+        },
         "type": "title"
       },
       {
         "key": "default_view",
-        "name": { "en": "Default view", "zh-CN": "默认视图", "zh-TW": "預設檢視", "ja": "既定の表示" },
+        "name": {
+          "en": "Default view",
+          "zh-CN": "默认视图",
+          "zh-TW": "預設檢視",
+          "ja": "既定の表示"
+        },
         "type": "select",
         "options": "grid,table,compact",
         "default": "grid",
@@ -34,7 +44,12 @@
       },
       {
         "key": "card_min_width",
-        "name": { "en": "Card minimum width (px)", "zh-CN": "卡片最小宽度 (px)", "zh-TW": "卡片最小寬度 (px)", "ja": "カード最小幅 (px)" },
+        "name": {
+          "en": "Card minimum width (px)",
+          "zh-CN": "卡片最小宽度 (px)",
+          "zh-TW": "卡片最小寬度 (px)",
+          "ja": "カード最小幅 (px)"
+        },
         "type": "number",
         "default": 320,
         "help": {
@@ -46,7 +61,12 @@
       },
       {
         "key": "offline_position",
-        "name": { "en": "Offline nodes", "zh-CN": "离线节点位置", "zh-TW": "離線節點位置", "ja": "オフラインノードの位置" },
+        "name": {
+          "en": "Offline nodes",
+          "zh-CN": "离线节点位置",
+          "zh-TW": "離線節點位置",
+          "ja": "オフラインノードの位置"
+        },
         "type": "select",
         "options": "keep,first,last",
         "default": "last",
@@ -59,7 +79,12 @@
       },
       {
         "key": "max_width",
-        "name": { "en": "Content max width (px)", "zh-CN": "内容最大宽度 (px)", "zh-TW": "內容最大寬度 (px)", "ja": "コンテンツ最大幅 (px)" },
+        "name": {
+          "en": "Content max width (px)",
+          "zh-CN": "内容最大宽度 (px)",
+          "zh-TW": "內容最大寬度 (px)",
+          "ja": "コンテンツ最大幅 (px)"
+        },
         "type": "number",
         "default": 1600,
         "help": {
@@ -71,7 +96,12 @@
       },
       {
         "key": "show_stat_bar",
-        "name": { "en": "Show summary bar", "zh-CN": "显示概览栏", "zh-TW": "顯示概覽列", "ja": "サマリーバーを表示" },
+        "name": {
+          "en": "Show summary bar",
+          "zh-CN": "显示概览栏",
+          "zh-TW": "顯示概覽列",
+          "ja": "サマリーバーを表示"
+        },
         "type": "switch",
         "default": true,
         "help": {
@@ -81,14 +111,57 @@
           "ja": "ノード一覧上部の集計ストリップ。"
         }
       },
-
       {
-        "name": { "en": "Appearance", "zh-CN": "外观", "zh-TW": "外觀", "ja": "外観" },
+        "key": "show_map",
+        "name": {
+          "en": "Show world map",
+          "zh-CN": "显示世界地图",
+          "zh-TW": "顯示世界地圖",
+          "ja": "世界地図を表示"
+        },
+        "type": "switch",
+        "default": true,
+        "help": {
+          "en": "Plots nodes on a dot-matrix world map between the summary bar and the node list. Positions come from each node's Region field, which must contain an ISO country code such as JP or DE.",
+          "zh-CN": "在概览栏与节点列表之间显示点阵世界地图。位置来自各节点的「地区」字段，需填写 ISO 国家代码（如 JP、DE）。",
+          "zh-TW": "在概覽列與節點清單之間顯示點陣世界地圖。位置來自各節點的「地區」欄位，需填寫 ISO 國家代碼（如 JP、DE）。",
+          "ja": "サマリーバーとノード一覧の間にドットマトリクス世界地図を表示します。位置は各ノードの「リージョン」欄（JP や DE などの ISO 国コード）に基づきます。"
+        }
+      },
+      {
+        "key": "map_height",
+        "name": {
+          "en": "Map height (px)",
+          "zh-CN": "地图高度 (px)",
+          "zh-TW": "地圖高度 (px)",
+          "ja": "地図の高さ (px)"
+        },
+        "type": "number",
+        "default": 300,
+        "help": {
+          "en": "Maximum height of the map. The map keeps its aspect ratio and centres itself, so this effectively sets how much vertical space it takes.",
+          "zh-CN": "地图的最大高度。地图会保持比例并居中显示，因此该值实际决定它占用的垂直空间。",
+          "zh-TW": "地圖的最大高度。地圖會保持比例並置中顯示，因此該值實際決定它佔用的垂直空間。",
+          "ja": "地図の最大の高さ。地図は縦横比を保って中央に配置されるため、この値が占有する縦幅を決めます。"
+        }
+      },
+      {
+        "name": {
+          "en": "Appearance",
+          "zh-CN": "外观",
+          "zh-TW": "外觀",
+          "ja": "外観"
+        },
         "type": "title"
       },
       {
         "key": "default_appearance",
-        "name": { "en": "Default appearance", "zh-CN": "默认明暗", "zh-TW": "預設明暗", "ja": "既定の配色" },
+        "name": {
+          "en": "Default appearance",
+          "zh-CN": "默认明暗",
+          "zh-TW": "預設明暗",
+          "ja": "既定の配色"
+        },
         "type": "select",
         "options": "system,dark,light",
         "default": "system",
@@ -101,7 +174,12 @@
       },
       {
         "key": "accent",
-        "name": { "en": "Accent colour", "zh-CN": "强调色", "zh-TW": "強調色", "ja": "アクセントカラー" },
+        "name": {
+          "en": "Accent colour",
+          "zh-CN": "强调色",
+          "zh-TW": "強調色",
+          "ja": "アクセントカラー"
+        },
         "type": "select",
         "options": "cyan,ice,mint,amber,violet,rose",
         "default": "cyan",
@@ -114,7 +192,12 @@
       },
       {
         "key": "density",
-        "name": { "en": "Density", "zh-CN": "信息密度", "zh-TW": "資訊密度", "ja": "情報密度" },
+        "name": {
+          "en": "Density",
+          "zh-CN": "信息密度",
+          "zh-TW": "資訊密度",
+          "ja": "情報密度"
+        },
         "type": "select",
         "options": "comfortable,compact,spacious",
         "default": "comfortable",
@@ -125,14 +208,23 @@
           "ja": "コンパクトは大規模向け、広めは大画面表示向けです。"
         }
       },
-
       {
-        "name": { "en": "Background", "zh-CN": "背景", "zh-TW": "背景", "ja": "背景" },
+        "name": {
+          "en": "Background",
+          "zh-CN": "背景",
+          "zh-TW": "背景",
+          "ja": "背景"
+        },
         "type": "title"
       },
       {
         "key": "bg_mode",
-        "name": { "en": "Background mode", "zh-CN": "背景模式", "zh-TW": "背景模式", "ja": "背景モード" },
+        "name": {
+          "en": "Background mode",
+          "zh-CN": "背景模式",
+          "zh-TW": "背景模式",
+          "ja": "背景モード"
+        },
         "type": "select",
         "options": "aurora,none,image,video,starfield,grid",
         "default": "aurora",
@@ -145,7 +237,12 @@
       },
       {
         "key": "bg_image_dark",
-        "name": { "en": "Background image (dark)", "zh-CN": "背景图片（深色）", "zh-TW": "背景圖片（深色）", "ja": "背景画像（ダーク）" },
+        "name": {
+          "en": "Background image (dark)",
+          "zh-CN": "背景图片（深色）",
+          "zh-TW": "背景圖片（深色）",
+          "ja": "背景画像（ダーク）"
+        },
         "type": "string",
         "default": "",
         "help": {
@@ -157,7 +254,12 @@
       },
       {
         "key": "bg_image_light",
-        "name": { "en": "Background image (light)", "zh-CN": "背景图片（浅色）", "zh-TW": "背景圖片（淺色）", "ja": "背景画像（ライト）" },
+        "name": {
+          "en": "Background image (light)",
+          "zh-CN": "背景图片（浅色）",
+          "zh-TW": "背景圖片（淺色）",
+          "ja": "背景画像（ライト）"
+        },
         "type": "string",
         "default": "",
         "help": {
@@ -169,7 +271,12 @@
       },
       {
         "key": "bg_video",
-        "name": { "en": "Background video URL", "zh-CN": "背景视频地址", "zh-TW": "背景影片網址", "ja": "背景動画 URL" },
+        "name": {
+          "en": "Background video URL",
+          "zh-CN": "背景视频地址",
+          "zh-TW": "背景影片網址",
+          "ja": "背景動画 URL"
+        },
         "type": "string",
         "default": "",
         "help": {
@@ -181,7 +288,12 @@
       },
       {
         "key": "bg_blur",
-        "name": { "en": "Background blur (px)", "zh-CN": "背景模糊 (px)", "zh-TW": "背景模糊 (px)", "ja": "背景ぼかし (px)" },
+        "name": {
+          "en": "Background blur (px)",
+          "zh-CN": "背景模糊 (px)",
+          "zh-TW": "背景模糊 (px)",
+          "ja": "背景ぼかし (px)"
+        },
         "type": "number",
         "default": 0,
         "help": {
@@ -193,7 +305,12 @@
       },
       {
         "key": "bg_overlay",
-        "name": { "en": "Background overlay (-100 to 100)", "zh-CN": "背景蒙版 (-100 至 100)", "zh-TW": "背景遮罩 (-100 至 100)", "ja": "背景オーバーレイ (-100〜100)" },
+        "name": {
+          "en": "Background overlay (-100 to 100)",
+          "zh-CN": "背景蒙版 (-100 至 100)",
+          "zh-TW": "背景遮罩 (-100 至 100)",
+          "ja": "背景オーバーレイ (-100〜100)"
+        },
         "type": "number",
         "default": 40,
         "help": {
@@ -205,13 +322,23 @@
       },
       {
         "key": "bg_fixed",
-        "name": { "en": "Fix background while scrolling", "zh-CN": "滚动时固定背景", "zh-TW": "捲動時固定背景", "ja": "スクロール時に背景を固定" },
+        "name": {
+          "en": "Fix background while scrolling",
+          "zh-CN": "滚动时固定背景",
+          "zh-TW": "捲動時固定背景",
+          "ja": "スクロール時に背景を固定"
+        },
         "type": "switch",
         "default": true
       },
       {
         "key": "allow_visitor_background",
-        "name": { "en": "Let visitors override the background", "zh-CN": "允许访客自定义背景", "zh-TW": "允許訪客自訂背景", "ja": "訪問者による背景変更を許可" },
+        "name": {
+          "en": "Let visitors override the background",
+          "zh-CN": "允许访客自定义背景",
+          "zh-TW": "允許訪客自訂背景",
+          "ja": "訪問者による背景変更を許可"
+        },
         "type": "switch",
         "default": true,
         "help": {
@@ -221,14 +348,23 @@
           "ja": "訪問者設定パネルに背景選択を追加し、各自のブラウザーに保存します。"
         }
       },
-
       {
-        "name": { "en": "Motion & effects", "zh-CN": "动效", "zh-TW": "動效", "ja": "モーションと効果" },
+        "name": {
+          "en": "Motion & effects",
+          "zh-CN": "动效",
+          "zh-TW": "動效",
+          "ja": "モーションと効果"
+        },
         "type": "title"
       },
       {
         "key": "enable_boot_sequence",
-        "name": { "en": "Boot sequence on load", "zh-CN": "加载启动动画", "zh-TW": "載入啟動動畫", "ja": "起動シーケンス" },
+        "name": {
+          "en": "Boot sequence on load",
+          "zh-CN": "加载启动动画",
+          "zh-TW": "載入啟動動畫",
+          "ja": "起動シーケンス"
+        },
         "type": "switch",
         "default": true,
         "help": {
@@ -240,19 +376,34 @@
       },
       {
         "key": "enable_grid_overlay",
-        "name": { "en": "Instrument grid overlay", "zh-CN": "仪表网格叠层", "zh-TW": "儀表格線疊層", "ja": "計器グリッド" },
+        "name": {
+          "en": "Instrument grid overlay",
+          "zh-CN": "仪表网格叠层",
+          "zh-TW": "儀表格線疊層",
+          "ja": "計器グリッド"
+        },
         "type": "switch",
         "default": true
       },
       {
         "key": "enable_glow",
-        "name": { "en": "Accent glow", "zh-CN": "强调色辉光", "zh-TW": "強調色輝光", "ja": "アクセントグロー" },
+        "name": {
+          "en": "Accent glow",
+          "zh-CN": "强调色辉光",
+          "zh-TW": "強調色輝光",
+          "ja": "アクセントグロー"
+        },
         "type": "switch",
         "default": true
       },
       {
         "key": "enable_scramble",
-        "name": { "en": "Text decode effect", "zh-CN": "文字解码效果", "zh-TW": "文字解碼效果", "ja": "テキストデコード効果" },
+        "name": {
+          "en": "Text decode effect",
+          "zh-CN": "文字解码效果",
+          "zh-TW": "文字解碼效果",
+          "ja": "テキストデコード効果"
+        },
         "type": "switch",
         "default": true,
         "help": {
@@ -264,18 +415,32 @@
       },
       {
         "key": "enable_pulse",
-        "name": { "en": "Pulse on data change", "zh-CN": "数据变化脉冲", "zh-TW": "資料變化脈衝", "ja": "データ更新時のパルス" },
+        "name": {
+          "en": "Pulse on data change",
+          "zh-CN": "数据变化脉冲",
+          "zh-TW": "資料變化脈衝",
+          "ja": "データ更新時のパルス"
+        },
         "type": "switch",
         "default": true
       },
-
       {
-        "name": { "en": "Data & connection", "zh-CN": "数据与连接", "zh-TW": "資料與連線", "ja": "データと接続" },
+        "name": {
+          "en": "Data & connection",
+          "zh-CN": "数据与连接",
+          "zh-TW": "資料與連線",
+          "ja": "データと接続"
+        },
         "type": "title"
       },
       {
         "key": "update_interval",
-        "name": { "en": "Update interval (seconds)", "zh-CN": "刷新间隔（秒）", "zh-TW": "更新間隔（秒）", "ja": "更新間隔（秒）" },
+        "name": {
+          "en": "Update interval (seconds)",
+          "zh-CN": "刷新间隔（秒）",
+          "zh-TW": "更新間隔（秒）",
+          "ja": "更新間隔（秒）"
+        },
         "type": "number",
         "default": 2,
         "help": {
@@ -287,7 +452,12 @@
       },
       {
         "key": "transport_preference",
-        "name": { "en": "Preferred transport", "zh-CN": "首选传输方式", "zh-TW": "偏好傳輸方式", "ja": "優先トランスポート" },
+        "name": {
+          "en": "Preferred transport",
+          "zh-CN": "首选传输方式",
+          "zh-TW": "偏好傳輸方式",
+          "ja": "優先トランスポート"
+        },
         "type": "select",
         "options": "auto,rpc2-ws,clients-ws,rpc2-http",
         "default": "auto",
@@ -300,7 +470,12 @@
       },
       {
         "key": "sse_endpoint",
-        "name": { "en": "SSE endpoint (advanced)", "zh-CN": "SSE 端点（进阶）", "zh-TW": "SSE 端點（進階）", "ja": "SSE エンドポイント（上級）" },
+        "name": {
+          "en": "SSE endpoint (advanced)",
+          "zh-CN": "SSE 端点（进阶）",
+          "zh-TW": "SSE 端點（進階）",
+          "ja": "SSE エンドポイント（上級）"
+        },
         "type": "string",
         "default": "",
         "help": {
@@ -312,7 +487,12 @@
       },
       {
         "key": "show_connection_badge",
-        "name": { "en": "Show connection tier badge", "zh-CN": "显示连接状态徽标", "zh-TW": "顯示連線狀態標記", "ja": "接続ティアバッジを表示" },
+        "name": {
+          "en": "Show connection tier badge",
+          "zh-CN": "显示连接状态徽标",
+          "zh-TW": "顯示連線狀態標記",
+          "ja": "接続ティアバッジを表示"
+        },
         "type": "switch",
         "default": true,
         "help": {
@@ -324,7 +504,12 @@
       },
       {
         "key": "loss_sensitivity",
-        "name": { "en": "Latency / loss sensitivity", "zh-CN": "延迟丢包敏感度", "zh-TW": "延遲丟包敏感度", "ja": "遅延・ロス感度" },
+        "name": {
+          "en": "Latency / loss sensitivity",
+          "zh-CN": "延迟丢包敏感度",
+          "zh-TW": "延遲丟包敏感度",
+          "ja": "遅延・ロス感度"
+        },
         "type": "select",
         "options": "standard,strict,relaxed",
         "default": "standard",
@@ -335,20 +520,34 @@
           "ja": "劣化/異常と判定する閾値。strict 3%/9%、standard 5%/12%、relaxed 10%/25%。プローブ間隔が長いと strict は 1 パケット欠落で反応します。"
         }
       },
-
       {
-        "name": { "en": "Privacy", "zh-CN": "隐私", "zh-TW": "隱私", "ja": "プライバシー" },
+        "name": {
+          "en": "Privacy",
+          "zh-CN": "隐私",
+          "zh-TW": "隱私",
+          "ja": "プライバシー"
+        },
         "type": "title"
       },
       {
         "key": "show_billing",
-        "name": { "en": "Show price and expiry", "zh-CN": "显示价格与到期时间", "zh-TW": "顯示價格與到期時間", "ja": "料金と有効期限を表示" },
+        "name": {
+          "en": "Show price and expiry",
+          "zh-CN": "显示价格与到期时间",
+          "zh-TW": "顯示價格與到期時間",
+          "ja": "料金と有効期限を表示"
+        },
         "type": "switch",
         "default": true
       },
       {
         "key": "footer_text",
-        "name": { "en": "Extra footer text", "zh-CN": "页脚附加文字", "zh-TW": "頁尾附加文字", "ja": "フッター追記" },
+        "name": {
+          "en": "Extra footer text",
+          "zh-CN": "页脚附加文字",
+          "zh-TW": "頁尾附加文字",
+          "ja": "フッター追記"
+        },
         "type": "string",
         "default": "",
         "help": {

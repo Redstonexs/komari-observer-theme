@@ -6,6 +6,7 @@ import { useAppStore } from "@/store/app";
 import { LineChart, type Series } from "@/components/LineChart";
 import { LOSS_THRESHOLDS } from "@/config/settings";
 import { formatLatency } from "@/lib/format";
+import { downsample } from "@/lib/series";
 
 const RANGES = [1, 4, 12, 24, 72] as const;
 
@@ -76,7 +77,17 @@ export function PingPage() {
     }
 
     const out: Series[] = [];
-    const summary: Array<{ uuid: string; name: string; loss: number; avg: number; min: number; max: number }> = [];
+    const summary: Array<{
+      uuid: string;
+      name: string;
+      /** Index into `out`. The table is sorted by name afterwards, so a row's
+       *  position is NOT its line's position in the chart ramp. */
+      slot: number;
+      loss: number;
+      avg: number;
+      min: number;
+      max: number;
+    }> = [];
 
     for (const [uuid, list] of byClient) {
       list.sort((a, b) => Date.parse(a.time) - Date.parse(b.time));
@@ -92,10 +103,19 @@ export function PingPage() {
       const good = list.filter((r) => r.value >= 0).map((r) => r.value);
       const lost = list.length - good.length;
 
-      out.push({ label: nameByUuid.get(uuid) ?? uuid, points, filled: false });
+      const slot = out.length;
+      // The server caps a ping query at 4000 points PER NODE, so a wide window
+      // over a big fleet would otherwise draw a solid block. Only the line is
+      // reduced; the loss and latency figures below use every record.
+      out.push({
+        label: nameByUuid.get(uuid) ?? uuid,
+        points: downsample(points),
+        filled: false,
+      });
       summary.push({
         uuid,
         name: nameByUuid.get(uuid) ?? uuid,
+        slot,
         loss: list.length ? (lost / list.length) * 100 : 0,
         avg: good.length ? good.reduce((a, b) => a + b, 0) / good.length : -1,
         min: good.length ? Math.min(...good) : -1,
@@ -166,7 +186,7 @@ export function PingPage() {
               </tr>
             </thead>
             <tbody>
-              {stats.map((row, i) => {
+              {stats.map((row) => {
                 const level =
                   row.loss >= thresholds.bad ? "bad" : row.loss >= thresholds.warn ? "warn" : "online";
                 return (
@@ -175,7 +195,7 @@ export function PingPage() {
                       <span className="status-dot" aria-hidden="true" />
                       <span
                         className="observer-legend-swatch"
-                        style={{ background: `var(--observer-chart-${(i % 9) + 1})` }}
+                        style={{ background: `var(--observer-chart-${(row.slot % 9) + 1})` }}
                         aria-hidden="true"
                       />
                       {row.name}

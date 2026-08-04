@@ -32,6 +32,8 @@ export interface ThemeSettings {
   offline_position: OfflinePosition;
   max_width: number;
   show_stat_bar: boolean;
+  show_map: boolean;
+  map_height: number;
   // Appearance
   default_appearance: Appearance;
   accent: AccentName;
@@ -68,6 +70,8 @@ export const DEFAULTS: ThemeSettings = {
   offline_position: "last",
   max_width: 1600,
   show_stat_bar: true,
+  show_map: true,
+  map_height: 300,
 
   default_appearance: "system",
   accent: "cyan",
@@ -141,6 +145,8 @@ export function resolveSettings(themeSettings: unknown): ThemeSettings {
     // 0 is meaningful here (full bleed), so only clamp the upper bound.
     max_width: clamp(num(s.max_width, d.max_width), 0, 4000),
     show_stat_bar: bool(s.show_stat_bar, d.show_stat_bar),
+    show_map: bool(s.show_map, d.show_map),
+    map_height: clamp(num(s.map_height, d.map_height), 140, 640),
 
     default_appearance: oneOf(
       s.default_appearance,

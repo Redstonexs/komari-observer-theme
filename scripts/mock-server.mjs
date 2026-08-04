@@ -239,25 +239,55 @@ function loadRecords(uuid, hours) {
   });
 }
 
-function pingRecords(taskId, hours) {
-  const count = 240;
+/** Probe definitions, shared by /api/task/ping and the record generator. */
+const PING_TASKS = [
+  { id: 1, weight: 10, name: "HTTP check", default_on: true, type: "http", interval: 60, base: 18 },
+  { id: 2, weight: 5, name: "ICMP", default_on: false, type: "icmp", interval: 30, base: 9 },
+];
+/** Probes only cover part of the fleet, so "no probe covers this node" is testable. */
+const pingClients = () => nodes.slice(0, 5).map((n) => n.uuid);
+
+/**
+ * Ping history.
+ *
+ * Both filters are honoured because the theme uses BOTH shapes: the per-node
+ * health block queries by uuid alone and expects one series per covering task,
+ * while the comparison page queries by task_id and expects one series per node.
+ * An earlier version ignored uuid, which made every node look identical.
+ *
+ * Point density matches the real server, which caps a ping query at 4000 points
+ * per task rather than the 500 that load records get.
+ */
+function pingRecords({ taskId, uuid, hours }) {
+  const clients = pingClients();
+  const targets = uuid ? clients.filter((c) => c === uuid) : clients;
+  const tasks = taskId ? PING_TASKS.filter((t) => t.id === taskId) : PING_TASKS;
+  if (targets.length === 0 || tasks.length === 0) return [];
+
   const span = hours * 3600_000;
-  const step = span / count;
   const now = Date.now();
   const out = [];
-  // A few nodes per task, with occasional loss so the gap rendering is exercised.
-  nodes.slice(0, 5).forEach((node, i) => {
-    for (let k = 0; k < count; k++) {
-      const t = now - span + k * step;
-      const lost = (k + i * 13) % 47 === 0;
-      out.push({
-        client: node.uuid,
-        task_id: taskId,
-        time: new Date(t).toISOString(),
-        value: lost ? -1 : Math.round(18 + i * 14 + Math.sin(k / 9 + i) * 9),
-      });
+
+  for (const task of tasks) {
+    // One sample per probe interval, clamped the way the server clamps it.
+    const count = Math.min(4000, Math.max(2, Math.round(span / (task.interval * 1000))));
+    const step = span / count;
+    for (const client of targets) {
+      const i = clients.indexOf(client);
+      for (let k = 0; k < count; k++) {
+        const t = now - span + k * step;
+        const lost = (k + i * 13 + task.id * 7) % 47 === 0;
+        out.push({
+          client,
+          task_id: task.id,
+          time: new Date(t).toISOString(),
+          value: lost
+            ? -1
+            : Math.round(task.base + i * 14 + Math.sin(k / 9 + i) * 9 + Math.sin(k / 2.3) * 3),
+        });
+      }
     }
-  });
+  }
   return out;
 }
 
@@ -455,18 +485,27 @@ const server = createServer((req, res) => {
 
   if (path === "/api/records/ping") {
     const hours = Number(url.searchParams.get("hours") ?? 4) || 4;
-    const taskId = Number(url.searchParams.get("task_id") ?? 1) || 1;
-    const records = pingRecords(taskId, hours);
+    const taskId = Number(url.searchParams.get("task_id") ?? 0) || 0;
+    const uuid = url.searchParams.get("uuid") ?? "";
+    const records = pingRecords({ taskId, uuid, hours });
     return json(res, ok({ count: records.length, records }));
   }
 
   if (path === "/api/task/ping") {
+    const clients = pingClients();
     return json(
       res,
-      ok([
-        { id: 1, weight: 10, name: "HTTP check", clients: nodes.slice(0, 5).map((n) => n.uuid), default_on: true, type: "http", interval: 60 },
-        { id: 2, weight: 5, name: "ICMP", clients: nodes.slice(0, 5).map((n) => n.uuid), default_on: false, type: "icmp", interval: 30 },
-      ]),
+      ok(
+        PING_TASKS.map(({ id, weight, name, default_on, type, interval }) => ({
+          id,
+          weight,
+          name,
+          clients,
+          default_on,
+          type,
+          interval,
+        })),
+      ),
     );
   }
 

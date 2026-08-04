@@ -150,5 +150,8 @@
   "footer": {
     "poweredBy": "Powered by Komari Monitor.",
     "theme": "Observer"
+  },
+  "map": {
+    "label": "節點分佈：{{count}} 個地區"
   }
 }

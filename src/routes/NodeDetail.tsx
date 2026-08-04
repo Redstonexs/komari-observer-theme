@@ -7,6 +7,7 @@ import { useAppStore } from "@/store/app";
 import { useLiveNode } from "@/hooks/useLiveNode";
 import { LineChart, type Series } from "@/components/LineChart";
 import { Gauge, type GaugeHandle } from "@/components/Gauge";
+import { NodeLatency, NodeUptime } from "@/components/NodeHealth";
 import {
   daysUntil,
   formatBytes,
@@ -132,6 +133,14 @@ export function NodeDetail() {
             )}
           </InfoPanel>
         )}
+      </section>
+
+      {/* Latency and availability describe THIS node. Averaging them across a
+          fleet produces a number that is true of nothing, so they live on the
+          node rather than in a global view. Each block owns its own window. */}
+      <section className="observer-charts observer-health">
+        <NodeLatency uuid={uuid} />
+        <NodeUptime uuid={uuid} />
       </section>
 
       <section className="observer-history">
