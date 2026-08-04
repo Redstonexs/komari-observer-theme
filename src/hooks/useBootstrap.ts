@@ -130,6 +130,9 @@ export function useBootstrap() {
         if (disposed) return;
         if (loggedInRef.current !== null && me.logged_in !== loggedInRef.current) {
           loggedInRef.current = me.logged_in;
+          // The header offers sign-in or the admin panel off this: signing in
+          // in another tab has to be reflected here, not left until a reload.
+          useAppStore.getState().setMe(me);
           useAppStore.getState().setNodes(await getNodes());
           supervisorRef.current?.reconnect();
         }

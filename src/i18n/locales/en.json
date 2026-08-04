@@ -1,6 +1,7 @@
 {
   "nav": {
-    "dashboard": "Fleet",
+    "login": "Sign in",
+    "admin": "Admin",
     "back": "Back to fleet"
   },
   "stat": {

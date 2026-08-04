@@ -23,6 +23,8 @@
  *   node scripts/mock-server.mjs --break rpc2-ws,rpc2-http   # forces tier 5
  *
  * --flaky drops the browser sockets every ~12s to exercise reconnect/backoff.
+ *
+ * --login answers /api/me as a signed-in operator instead of a guest.
  */
 
 import { createServer } from "node:http";
@@ -39,6 +41,7 @@ const PORT = Number(arg("port", 25774));
 const NODE_COUNT = Number(arg("nodes", 12));
 const BROKEN = new Set(String(arg("break", "")).split(",").filter(Boolean));
 const FLAKY = args.includes("--flaky");
+const LOGGED_IN = args.includes("--login");
 
 /* ---- fixture fleet ------------------------------------------------ */
 
@@ -461,7 +464,14 @@ const server = createServer((req, res) => {
   }
 
   // Bare object, no envelope — matches WithRaw() on the real endpoint.
-  if (path === "/api/me") return json(res, { username: "Guest", logged_in: false });
+  if (path === "/api/me") {
+    return json(
+      res,
+      LOGGED_IN
+        ? { username: "operator", logged_in: true, uuid: randomUUID() }
+        : { username: "Guest", logged_in: false },
+    );
+  }
 
   if (path === "/api/version") return json(res, ok({ version: "1.3.2-mock", hash: "mock" }));
 

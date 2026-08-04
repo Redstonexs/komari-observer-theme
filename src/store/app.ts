@@ -54,6 +54,7 @@ interface AppState {
   }): void;
   setBootError(message: string): void;
   setNeedsLogin(value: boolean): void;
+  setMe(me: Me): void;
   setNodes(nodes: NodeInfo[]): void;
   setLink(link: LinkStatus): void;
   setView(view: ViewMode): void;
@@ -154,6 +155,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setBootError: (message) => set({ bootError: message, ready: true }),
   setNeedsLogin: (value) => set({ needsLogin: value }),
+  setMe: (me) => set({ me }),
   setNodes: (nodes) => set({ nodes }),
   setLink: (link) => set({ link }),
 

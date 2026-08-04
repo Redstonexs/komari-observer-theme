@@ -1,7 +1,7 @@
 /** Page chrome: header, nav, display settings, footer. */
 
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink } from "react-router";
+import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "@/store/app";
 import { SUPPORTED, setLocale, type Locale } from "@/i18n";
@@ -35,13 +35,8 @@ export function Header() {
           <span className="observer-brand-name">{sitename}</span>
         </Link>
 
-        <nav className="observer-nav" data-boot="chrome">
-          <NavLink to="/" end className="observer-navlink">
-            {t("nav.dashboard")}
-          </NavLink>
-        </nav>
-
         <div className="observer-header-right" data-boot="chrome">
+          <AuthLink />
           <ConnectionBadge />
           <button
             type="button"
@@ -57,6 +52,38 @@ export function Header() {
       <div className="observer-rule" data-boot="rule" aria-hidden="true" />
       {panelOpen && <SettingsPanel onClose={() => setPanelOpen(false)} />}
     </header>
+  );
+}
+
+/**
+ * Sign in, or the way back to the admin panel once signed in.
+ *
+ * One destination either way: Komari force-serves its own interface at /admin
+ * server-side, so this must be a real navigation, not a client route — the same
+ * reason the private-site gate links there.
+ *
+ * Held back until the boot settles, which is the point at which the session is
+ * known. Every terminal path sets `ready`, including a failed one, so an
+ * unreachable server still leaves a way in rather than flashing the wrong label
+ * at someone who is already signed in.
+ */
+function AuthLink() {
+  const { t } = useTranslation();
+  const ready = useAppStore((s) => s.ready);
+  const me = useAppStore((s) => s.me);
+
+  if (!ready) return null;
+  const loggedIn = me?.logged_in ?? false;
+
+  return (
+    <a
+      className="observer-authlink"
+      href="/admin"
+      data-auth={loggedIn ? "in" : "out"}
+      title={loggedIn ? me?.username : undefined}
+    >
+      {loggedIn ? t("nav.admin") : t("nav.login")}
+    </a>
   );
 }
 

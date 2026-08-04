@@ -1,6 +1,7 @@
 {
   "nav": {
-    "dashboard": "ノード",
+    "login": "ログイン",
+    "admin": "管理画面",
     "back": "ノード一覧へ戻る"
   },
   "stat": {

@@ -1,6 +1,7 @@
 {
   "nav": {
-    "dashboard": "节点",
+    "login": "登录",
+    "admin": "管理面板",
     "back": "返回节点列表"
   },
   "stat": {

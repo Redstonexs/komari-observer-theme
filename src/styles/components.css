@@ -71,39 +71,45 @@
   text-transform: uppercase;
 }
 
-.observer-nav {
+.observer-header-right {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 10px;
+  /* Carries the push that the nav used to: the brand is the only thing on the
+     left now. */
   margin-inline-start: auto;
 }
 
-.observer-navlink {
+/* Pill-shaped to sit with the connection badge beside it rather than reading
+   as a second gear. */
+.observer-authlink {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border: 1px solid var(--observer-line);
+  border-radius: 99px;
   font-family: var(--observer-font-chrome);
   font-size: 11px;
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--observer-text-muted);
   text-decoration: none;
-  padding: 6px 10px;
-  border-radius: var(--observer-radius);
-  border: 1px solid transparent;
-  transition: color var(--observer-dur-fast) var(--observer-ease);
+  white-space: nowrap;
+  transition:
+    color var(--observer-dur-fast) var(--observer-ease),
+    border-color var(--observer-dur-fast) var(--observer-ease);
 }
 
-.observer-navlink:hover {
-  color: var(--observer-text);
-}
-
-.observer-navlink.active {
+/* Signing in is the one thing a locked-out visitor can do — say so. */
+.observer-authlink[data-auth="out"] {
   color: var(--observer-accent);
   border-color: color-mix(in oklch, var(--observer-accent) 35%, transparent);
   background: color-mix(in oklch, var(--observer-accent) 8%, transparent);
 }
 
-.observer-header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.observer-authlink:hover {
+  color: var(--observer-accent);
+  border-color: color-mix(in oklch, var(--observer-accent) 45%, transparent);
 }
 
 .observer-iconbtn {
