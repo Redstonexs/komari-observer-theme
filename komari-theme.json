@@ -2,7 +2,7 @@
   "name": "Observer",
   "short": "observer",
   "description": "A futuristic, minimalist HUD theme for Komari Monitor. Deep-space palette, instrument typography, GSAP motion, custom backgrounds, and an automatic transport ladder that degrades gracefully when the connection gets unstable.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Redstonexs",
   "url": "https://github.com/Redstonexs/komari-observer-theme",
   "preview": "preview.png",
