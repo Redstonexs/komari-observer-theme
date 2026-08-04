@@ -12,10 +12,10 @@
  * That inference is stated in the UI rather than presented as fact.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getLoadRecords, getPingRecords, getPingTasks } from "@/api/client";
-import type { PingRecord, PublicPingTask } from "@/api/types";
+import type { LoadRecord, PingRecord, PublicPingTask } from "@/api/types";
 import { LineChart, type Series } from "@/components/LineChart";
 import { LOSS_THRESHOLDS } from "@/config/settings";
 import { useAppStore } from "@/store/app";
@@ -27,6 +27,12 @@ type SlotState = "online" | "offline" | "unknown";
 /** Each block owns its own window, so neither control can surprise the other. */
 const PING_RANGES = [4, 12, 24, 72] as const;
 const UPTIME_RANGES = [24, 72, 168] as const;
+
+/** Slot width the availability strip aims for, gap included. */
+const SLOT_PITCH_PX = 28;
+/** Bucket sizes the strip may pick from, in minutes. A reader can reason about
+ *  "3h"; nothing is gained by offering them "3h 37m". */
+const SLOT_MINUTES = [30, 60, 90, 120, 180, 240, 360, 720] as const;
 
 /** `formatLatency` returns an em dash for "no sample" — don't suffix that. */
 const latency = (ms: number) => (ms >= 0 ? `${formatLatency(ms)}ms` : "—");
@@ -213,62 +219,92 @@ export function NodeUptime({ uuid }: { uuid: string }) {
   const { t } = useTranslation();
   const recordEnabled = useAppStore((s) => s.publicSettings?.record_enabled ?? true);
   const [hours, setHours] = useState(24);
-  const [slots, setSlots] = useState<SlotState[]>([]);
-  const [availability, setAvailability] = useState(0);
+  // The fetch time travels with the records: bucketing is re-run on resize, and
+  // re-anchoring the slots to a newer "now" each time would slide the window
+  // out from under the data it is describing.
+  const [data, setData] = useState<{ records: LoadRecord[]; fetchedAt: number } | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Wider windows need wider buckets or the strip becomes unreadable confetti.
-  const slotMinutes = hours <= 24 ? 60 : hours <= 72 ? 180 : 360;
+  // The strip spans the page, so a fixed bucket count cannot serve every width:
+  // the 24 that read well in a half-width panel stretch into bars across a
+  // desktop, and buckets fine enough for a desktop become confetti on a phone.
+  // Measured the way LineChart measures its host.
+  const hostRef = useRef<HTMLDivElement | null>(null);
+  const [width, setWidth] = useState(0);
+  useLayoutEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    const measure = () => setWidth(host.clientWidth);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(host);
+    return () => observer.disconnect();
+  }, []);
+
+  const slotMinutes = useMemo(() => {
+    const ideal = (hours * 60) / Math.max(8, Math.round(width / SLOT_PITCH_PX));
+    // A bucket too small to span several samples turns ordinary cadence jitter
+    // into fake downtime. The server hands back ~500 points per window whatever
+    // the range, so keep a bucket worth at least ~4 of them.
+    const floor = Math.max(30, (4 * hours * 60) / 500);
+    const allowed = SLOT_MINUTES.filter((m) => m >= floor);
+    return (allowed.length ? allowed : [SLOT_MINUTES[SLOT_MINUTES.length - 1]]).reduce((best, m) =>
+      Math.abs(m - ideal) < Math.abs(best - ideal) ? m : best,
+    );
+  }, [hours, width]);
 
   useEffect(() => {
     if (!recordEnabled) return;
     let cancelled = false;
     setLoading(true);
-
-    const now = Date.now();
-    const slotMs = slotMinutes * 60_000;
-    const count = Math.floor((hours * 3_600_000) / slotMs);
-    const start = now - count * slotMs;
-
     getLoadRecords(uuid, hours, "cpu")
-      .then((data) => {
-        if (cancelled) return;
-        const next: SlotState[] = Array.from({ length: count }, () => "offline");
-        let earliest = Infinity;
-
-        for (const record of data.records ?? []) {
-          const time = Date.parse(record.time);
-          if (!Number.isFinite(time)) continue;
-          earliest = Math.min(earliest, time);
-          const index = Math.floor((time - start) / slotMs);
-          if (index >= 0 && index < count) next[index] = "online";
-        }
-
-        // Before the node's first record it was not "down", it was unknown —
-        // a node added yesterday must not read as a week of downtime.
-        if (Number.isFinite(earliest)) {
-          const firstKnown = Math.floor((earliest - start) / slotMs);
-          for (let i = 0; i < Math.min(firstKnown, count); i++) next[i] = "unknown";
-        } else {
-          next.fill("unknown");
-        }
-
-        const known = next.filter((s) => s !== "unknown");
-        const up = known.filter((s) => s === "online").length;
-        setSlots(next);
-        setAvailability(known.length ? (up / known.length) * 100 : 0);
+      .then((res) => {
+        if (!cancelled) setData({ records: res.records ?? [], fetchedAt: Date.now() });
       })
       .catch(() => {
-        if (!cancelled) setSlots([]);
+        if (!cancelled) setData(null);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-
     return () => {
       cancelled = true;
     };
-  }, [uuid, hours, slotMinutes, recordEnabled]);
+  }, [uuid, hours, recordEnabled]);
+
+  // Bucketing is pure, so a resize re-slices the records already in hand rather
+  // than asking the server for the same window again.
+  const { slots, availability } = useMemo(() => {
+    const empty = { slots: [] as SlotState[], availability: 0 };
+    if (!data) return empty;
+
+    const slotMs = slotMinutes * 60_000;
+    const count = Math.floor((hours * 3_600_000) / slotMs);
+    const start = data.fetchedAt - count * slotMs;
+    const next: SlotState[] = Array.from({ length: count }, () => "offline");
+    let earliest = Infinity;
+
+    for (const record of data.records) {
+      const time = Date.parse(record.time);
+      if (!Number.isFinite(time)) continue;
+      earliest = Math.min(earliest, time);
+      const index = Math.floor((time - start) / slotMs);
+      if (index >= 0 && index < count) next[index] = "online";
+    }
+
+    // Before the node's first record it was not "down", it was unknown —
+    // a node added yesterday must not read as a week of downtime.
+    if (Number.isFinite(earliest)) {
+      const firstKnown = Math.floor((earliest - start) / slotMs);
+      for (let i = 0; i < Math.min(firstKnown, count); i++) next[i] = "unknown";
+    } else {
+      next.fill("unknown");
+    }
+
+    const known = next.filter((s) => s !== "unknown");
+    const up = known.filter((s) => s === "online").length;
+    return { slots: next, availability: known.length ? (up / known.length) * 100 : 0 };
+  }, [data, hours, slotMinutes]);
 
   if (!recordEnabled) return null;
 
@@ -288,32 +324,36 @@ export function NodeUptime({ uuid }: { uuid: string }) {
         </div>
       </div>
 
-      {loading && slots.length === 0 ? (
-        <p className="observer-empty chrome">…</p>
-      ) : slots.length === 0 ? (
-        <p className="observer-empty">{t("detail.noHistory")}</p>
-      ) : (
-        <div
-          className="observer-uptime-strip observer-uptime-strip-lg"
-          role="img"
-          aria-label={`${t("uptime.availability")} ${availability.toFixed(2)}%`}
-        >
-          {slots.map((slot, i) => (
-            <span
-              key={i}
-              className="observer-uptime-slot"
-              data-slot={slot}
-              title={t(
-                slot === "online"
-                  ? "uptime.slotOnline"
-                  : slot === "offline"
-                    ? "uptime.slotOffline"
-                    : "uptime.slotUnknown",
-              )}
-            />
-          ))}
-        </div>
-      )}
+      {/* Always rendered, empty or not: it is what the ResizeObserver watches,
+          and the slot count is decided from its width. */}
+      <div ref={hostRef} className="observer-uptime-host">
+        {loading && slots.length === 0 ? (
+          <p className="observer-empty chrome">…</p>
+        ) : slots.length === 0 ? (
+          <p className="observer-empty">{t("detail.noHistory")}</p>
+        ) : (
+          <div
+            className="observer-uptime-strip observer-uptime-strip-lg"
+            role="img"
+            aria-label={`${t("uptime.availability")} ${availability.toFixed(2)}%`}
+          >
+            {slots.map((slot, i) => (
+              <span
+                key={i}
+                className="observer-uptime-slot"
+                data-slot={slot}
+                title={t(
+                  slot === "online"
+                    ? "uptime.slotOnline"
+                    : slot === "offline"
+                      ? "uptime.slotOffline"
+                      : "uptime.slotUnknown",
+                )}
+              />
+            ))}
+          </div>
+        )}
+      </div>
       <p className="chrome observer-note">{t("uptime.note")}</p>
     </div>
   );

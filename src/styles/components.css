@@ -1129,15 +1129,14 @@
   }
 }
 
-/* ---- Per-node health (latency + availability) ----------------------- */
+/* ---- Per-node health (availability + latency) ----------------------- */
 
-/* Wider minimum than the resource charts: a latency block carries a legend
-   row per probe, and an availability strip needs room for its slots. */
+/* One column, never the auto-fit grid the resource charts use: beside the
+   latency chart the availability strip is a single row in a tall panel, so
+   most of that panel was empty. Stacked, the strip gets the full width for its
+   slots and the latency block keeps its per-probe legend rows intact. */
 .observer-health {
-  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-  /* The availability strip is a fraction of the latency chart's height; letting
-     it stretch to match leaves most of its panel empty. */
-  align-items: start;
+  grid-template-columns: 1fr;
 }
 
 /* The head is shared with the history section, where the title is an h2. */
@@ -1194,6 +1193,12 @@
   flex-wrap: wrap;
 }
 
+/* Measured by a ResizeObserver — the strip picks its bucket size from this
+   width, so it must be a plain full-width block. */
+.observer-uptime-host {
+  width: 100%;
+}
+
 /* Only one node's history is on screen here, so the slots can be tall enough
    to actually read rather than the 20px used for a stacked fleet list. */
 .observer-uptime-strip-lg {
@@ -1206,9 +1211,6 @@
 }
 
 @media (max-width: 640px) {
-  .observer-health {
-    grid-template-columns: 1fr;
-  }
   .observer-pingstat-range {
     display: none;
   }

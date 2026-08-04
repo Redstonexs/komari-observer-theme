@@ -137,10 +137,12 @@ export function NodeDetail() {
 
       {/* Latency and availability describe THIS node. Averaging them across a
           fleet produces a number that is true of nothing, so they live on the
-          node rather than in a global view. Each block owns its own window. */}
+          node rather than in a global view. Each block owns its own window.
+          Stacked rather than side by side: availability is one strip on a time
+          axis, so it reads as a banner over the latency detail below it. */}
       <section className="observer-charts observer-health">
-        <NodeLatency uuid={uuid} />
         <NodeUptime uuid={uuid} />
+        <NodeLatency uuid={uuid} />
       </section>
 
       <section className="observer-history">
