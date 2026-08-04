@@ -66,6 +66,11 @@ are deliberately no fleet-wide latency or uptime pages: an averaged latency
 describes no node in particular, and an averaged availability hides the one node
 that was down.
 
+**Readable charts** — every chart carries a crosshair readout: point at it, or
+focus it and walk the arrow keys, to get each series' value at one instant. The
+cursor snaps to a real sample rather than interpolating along the path, so the
+number shown is a number the server actually reported.
+
 **Custom backgrounds** — a built-in aurora, starfield or instrument grid needing
 no hosted asset, or your own image or video with independent light/dark sources,
 blur, and a signed overlay control. Visitors can override the background for

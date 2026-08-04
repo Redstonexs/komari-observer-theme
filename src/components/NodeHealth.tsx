@@ -162,6 +162,9 @@ export function NodeLatency({ uuid }: { uuid: string }) {
             series={series}
             height={200}
             formatY={(v) => `${Math.round(v)}ms`}
+            // The axis rounds; a value being pointed at should not, or a probe
+            // sitting at 17.4ms and one at 16.6ms read as the same number.
+            formatValue={(v) => `${formatLatency(v)}ms`}
             ariaLabel={t("ping.title")}
           />
           <div className="observer-pingstats">

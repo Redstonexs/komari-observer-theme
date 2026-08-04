@@ -761,8 +761,11 @@
 }
 
 /* Measured by a ResizeObserver so the SVG viewBox can be 1:1 with pixels —
-   see the note in LineChart.tsx about axis-label legibility. */
+   see the note in LineChart.tsx about axis-label legibility.
+   Positioned because the hover readout is an HTML overlay, not SVG text: it
+   needs the page's fonts, ellipsis and flip-at-the-edge behaviour. */
 .observer-chart-host {
+  position: relative;
   width: 100%;
 }
 
@@ -785,6 +788,75 @@
 .observer-chart-empty {
   padding: 30px;
   text-align: center;
+}
+
+/* ---- Hover readout ------------------------------------------------- */
+
+.observer-chart-cursor line {
+  stroke: var(--observer-line-strong);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+/* Ringed in the surface colour so a marker stays legible where two lines
+   cross each other. */
+.observer-chart-dot {
+  stroke: var(--observer-surface-solid);
+  stroke-width: 1.5;
+}
+
+.observer-chart-tip {
+  position: absolute;
+  top: 4px;
+  z-index: 2;
+  min-width: 108px;
+  /* Half the chart less the offset: the tooltip flips sides at the midpoint,
+     so this is exactly the room the losing side is guaranteed to have. */
+  max-width: calc(50% - 16px);
+  padding: 8px 10px;
+  border: var(--observer-hairline) solid var(--observer-line);
+  border-radius: var(--observer-radius);
+  /* Solid, not the translucent panel surface: this sits on top of the very
+     lines it is describing. */
+  background: var(--observer-surface-solid);
+  box-shadow: 0 8px 24px -10px oklch(0 0 0 / 0.55);
+  opacity: 0;
+  /* Never let the tooltip steal the pointer from the chart underneath it. */
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.observer-chart-tip[data-open="true"] {
+  opacity: 1;
+}
+
+.observer-chart-tip-time {
+  margin-bottom: 6px;
+  font-size: 11px;
+  color: var(--observer-text);
+}
+
+.observer-chart-tip-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.observer-chart-tip-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 9px;
+  color: var(--observer-text-muted);
+}
+
+.observer-chart-tip-value {
+  margin-inline-start: 10px;
+  color: var(--observer-text);
 }
 
 .observer-note {

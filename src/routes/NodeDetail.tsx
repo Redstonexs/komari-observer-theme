@@ -168,6 +168,7 @@ export function NodeDetail() {
                 series={[toSeries(t("card.cpu"), (r) => r.cpu)]}
                 maxY={100}
                 formatY={(v) => `${Math.round(v)}%`}
+                formatValue={(v) => `${v.toFixed(1)}%`}
                 ariaLabel={t("card.cpu")}
               />
             </ChartBlock>
@@ -181,6 +182,7 @@ export function NodeDetail() {
                 ]}
                 maxY={100}
                 formatY={(v) => `${Math.round(v)}%`}
+                formatValue={(v) => `${v.toFixed(1)}%`}
                 ariaLabel={t("card.memory")}
               />
             </ChartBlock>
@@ -192,6 +194,8 @@ export function NodeDetail() {
                   { ...toSeries("↑", (r) => r.net_out, false) },
                 ]}
                 formatY={(v) => formatRate(v)}
+                // The axis is a scale, the readout is a rate — say so.
+                formatValue={(v) => `${formatRate(v)}/s`}
                 ariaLabel={t("card.network")}
               />
             </ChartBlock>
@@ -200,6 +204,7 @@ export function NodeDetail() {
               <LineChart
                 series={[toSeries(t("card.load"), (r) => r.load)]}
                 formatY={(v) => v.toFixed(1)}
+                formatValue={(v) => v.toFixed(2)}
                 ariaLabel={t("card.load")}
               />
             </ChartBlock>
@@ -217,6 +222,7 @@ export function NodeDetail() {
                   }))}
                   maxY={100}
                   formatY={(v) => `${Math.round(v)}%`}
+                  formatValue={(v) => `${v.toFixed(1)}%`}
                   ariaLabel={t("card.gpu")}
                 />
               </ChartBlock>
