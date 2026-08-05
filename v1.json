@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated_at": "2026-08-04T12:23:01.880Z",
+  "updated_at": "2026-08-04T18:31:01.141Z",
   "themes": [
     {
       "name": "Observer",
@@ -11,12 +11,12 @@
         "zh-TW": "為 Komari Monitor 打造的極簡未來感 HUD 主題。深空配色、儀表級字體、GSAP 動效、自訂背景，並在連線不穩定時自動逐級降級傳輸通道。",
         "ja": "Komari Monitor 向けのミニマルで近未来的な HUD テーマ。深宇宙のパレット、計器フォント、GSAP アニメーション、カスタム背景に加え、接続が不安定になると転送方式を自動的に切り替えます。"
       },
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": "Redstonexs",
       "url": "https://github.com/Redstonexs/komari-observer-theme",
       "preview": "https://raw.githubusercontent.com/Redstonexs/komari-observer-theme/refs/heads/main/preview.png",
-      "download": "https://github.com/Redstonexs/komari-observer-theme/releases/download/v0.1.1/komari-theme-observer.zip",
-      "sha256": "c8a2b3a4fddd802f364abffa108886d6863aa0b15fbff37705cf5048f99c73eb"
+      "download": "https://github.com/Redstonexs/komari-observer-theme/releases/download/v0.1.2/komari-theme-observer.zip",
+      "sha256": "99e29e0eebb60ec7caa61e79d6ee46b526d41eee93f31efc5a78b2d4868a5455"
     }
   ]
 }
