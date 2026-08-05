@@ -55,7 +55,21 @@ The following are bundled under the MIT licence:
 | `tailwindcss` | https://github.com/tailwindlabs/tailwindcss |
 
 Build-time only (not shipped in `dist/`): `vite`, `typescript`, `esbuild`,
-`@vitejs/plugin-react`, `@tailwindcss/vite`.
+`@vitejs/plugin-react`, `@tailwindcss/vite`, `@iconify-json/flag`.
+
+---
+
+## Flag Icons
+
+The country flags under `src/assets/flags/` (and therefore in `dist/`) are
+[Flag Icons](https://github.com/lipis/flag-icons) by Panayiotis Lipiridis, MIT
+licensed. They are extracted from the `@iconify-json/flag` package by
+`scripts/make-flags.mjs` and committed as individual SVGs, so the icon package
+itself is only a build-time dependency and the theme never calls out to an icon
+CDN at runtime.
+
+Flags are political artefacts and the set is maintained upstream; disputes about
+what is depicted for a given territory belong there, not here.
 
 ---
 

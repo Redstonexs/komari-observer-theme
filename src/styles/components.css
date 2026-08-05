@@ -636,7 +636,7 @@
 .observer-region {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   flex: none;
   /* The code reads as data, not as one more muted chrome label. */
   color: var(--observer-text);
@@ -644,11 +644,17 @@
 }
 
 .observer-region-flag {
-  /* Larger than its code, and outside the chrome tracking around it: at label
-     size a flag otherwise shrinks into a smudge. */
-  font-size: 1.2em;
-  line-height: 1;
-  letter-spacing: 0;
+  /* Sized from the code beside it rather than in pixels: the marker appears at
+     three different text sizes and should track each one. 4:3 artwork, so the
+     width follows. */
+  height: 1.25em;
+  width: auto;
+  flex: none;
+  border-radius: 1px;
+  /* Flags with white at the edge — JP, PL — dissolve into a light surface
+     without this. A hairline, not a frame: it redraws the edge the artwork
+     assumes is there. */
+  box-shadow: 0 0 0 1px var(--observer-line-strong);
 }
 
 .observer-legend-swatch {

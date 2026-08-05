@@ -12,6 +12,7 @@
     "lint": "tsc -b",
     "verify": "node scripts/verify-dist.mjs",
     "package": "bash scripts/build-theme.sh",
+    "flags": "node scripts/make-flags.mjs",
     "catalog": "node scripts/make-catalog.mjs",
     "catalog:check": "node scripts/make-catalog.mjs --check",
     "mock": "node scripts/mock-server.mjs",
@@ -29,6 +30,7 @@
     "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "@iconify-json/flag": "^1.2.12",
     "@tailwindcss/vite": "^4.0.0",
     "@types/node": "^26.1.2",
     "@types/react": "^19.0.0",

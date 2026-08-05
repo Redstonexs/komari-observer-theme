@@ -48,13 +48,6 @@ export function regionCode(region: string): string | null {
   return COUNTRY_LATLNG[resolved] ? resolved : null;
 }
 
-/** The flag emoji for an alpha-2 code. */
-export function regionFlag(code: string): string {
-  return [...code]
-    .map((ch) => String.fromCodePoint(INDICATOR_A + ch.charCodeAt(0) - LETTER_A))
-    .join("");
-}
-
 /** One formatter per locale — a fleet table asks for this once per row. */
 const NAMES = new Map<string, Intl.DisplayNames | null>();
 
