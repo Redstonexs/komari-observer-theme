@@ -1081,6 +1081,12 @@
 .observer-marker-halo {
   fill: var(--status-color, var(--observer-idle));
   opacity: 0.16;
+  /* Both lines, or neither. `transform-box` defaults to `view-box` on SVG, which
+     makes "center" the centre of the whole map rather than of this circle — the
+     halo then scales about a point hundreds of pixels away and flies off across
+     the map instead of swelling where it stands. `fill-box` is the circle's own
+     bounding box, whose centre is the marker. */
+  transform-box: fill-box;
   transform-origin: center;
 }
 
@@ -1088,10 +1094,15 @@
   animation: observer-ping 2.8s var(--observer-ease) infinite;
 }
 
+/* Starts at rest size rather than smaller than the dot: the halo is only 5px
+   wider than the marker it sits under, so anything below scale(1) is simply
+   hidden behind it and the pulse does not begin until it is already fading.
+   The tail holds at zero to leave a beat between breaths — a map of twenty
+   countries rippling without pause is noise. */
 @keyframes observer-ping {
-  0% { opacity: 0.3; transform: scale(0.55); }
-  70% { opacity: 0; transform: scale(1.15); }
-  100% { opacity: 0; transform: scale(1.15); }
+  0% { opacity: 0.34; transform: scale(1); }
+  70% { opacity: 0; transform: scale(2.1); }
+  100% { opacity: 0; transform: scale(2.1); }
 }
 
 .observer-marker[data-status="online"] { --status-color: var(--observer-ok); }
