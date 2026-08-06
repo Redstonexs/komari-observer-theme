@@ -70,6 +70,7 @@
     "system": "系统",
     "network": "网络",
     "billing": "账单",
+    "usage": "使用率",
     "history": "历史",
     "cpuModel": "处理器",
     "cores": "核心数",

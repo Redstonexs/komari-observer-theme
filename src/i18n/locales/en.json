@@ -70,6 +70,7 @@
     "system": "System",
     "network": "Network",
     "billing": "Billing",
+    "usage": "Usage",
     "history": "History",
     "cpuModel": "CPU",
     "cores": "Cores",

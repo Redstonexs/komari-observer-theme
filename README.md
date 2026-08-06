@@ -59,6 +59,13 @@ data transport; older servers fall back automatically. The theme market needs
 **Views** — card grid, dense sortable table, and a compact mode for large fleets,
 over a dot-matrix world map of where the fleet actually lives.
 
+**Usage at a glance** — CPU, memory and disk carry a graduated bar that runs
+green below 75%, amber to 90% and red above it, on every card, every table row,
+the fleet totals and the node page. The bars share their thresholds with the
+dials, so one metric never reads as healthy on one instrument and hot on the
+other, and the figure beside each bar means the level is never carried by colour
+alone.
+
 **Per-node health** — latency and availability are properties of a node, not of a
 fleet, so each detail page carries its own probe-latency chart and status-page
 availability strip alongside CPU / memory / network / load / GPU history. There

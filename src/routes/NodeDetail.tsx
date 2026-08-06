@@ -7,6 +7,7 @@ import { useAppStore } from "@/store/app";
 import { useLiveNode } from "@/hooks/useLiveNode";
 import { LineChart, type Series } from "@/components/LineChart";
 import { Gauge, type GaugeHandle } from "@/components/Gauge";
+import { Meter, type MeterHandle } from "@/components/Meter";
 import { NodeLatency, NodeUptime } from "@/components/NodeHealth";
 import { RegionTag } from "@/components/RegionTag";
 import {
@@ -17,7 +18,7 @@ import {
   formatUptime,
   parseTags,
 } from "@/lib/format";
-import { diskPercent, memPercent } from "@/api/model";
+import { diskPercent, memPercent, swapPercent } from "@/api/model";
 
 const RANGES = [1, 4, 12, 24, 72, 168] as const;
 
@@ -88,6 +89,8 @@ export function NodeDetail() {
       </div>
 
       <section className="observer-detail-grid">
+        <UsagePanel uuid={uuid} node={node} />
+
         <InfoPanel title={t("detail.hardware")}>
           <Row label={t("detail.cpuModel")} value={node.cpu_name} />
           <Row
@@ -273,6 +276,86 @@ function LiveHeadline({ uuid }: { uuid: string }) {
         </span>
       </div>
     </div>
+  );
+}
+
+/**
+ * Live usage, in absolute terms.
+ *
+ * The dials in the headline give the percentages; this gives the figures behind
+ * them, plus swap — which the hardware panel reports only as a capacity, and
+ * nothing on the page reports as a level.
+ */
+function UsagePanel({ uuid, node }: { uuid: string; node: NodeInfo }) {
+  const { t } = useTranslation();
+  const cpuMeter = useRef<MeterHandle | null>(null);
+  const memMeter = useRef<MeterHandle | null>(null);
+  const swapMeter = useRef<MeterHandle | null>(null);
+  const diskMeter = useRef<MeterHandle | null>(null);
+  const cpuRef = useRef<HTMLSpanElement | null>(null);
+  const memRef = useRef<HTMLSpanElement | null>(null);
+  const swapRef = useRef<HTMLSpanElement | null>(null);
+  const diskRef = useRef<HTMLSpanElement | null>(null);
+
+  // Capacity is a property of the machine, so the row's presence is decided
+  // from the node rather than from a tick that may not have arrived yet.
+  const hasSwap = node.swap_total > 0;
+
+  useLiveNode(uuid, (record) => {
+    const write = (ref: React.RefObject<HTMLSpanElement | null>, value: string) => {
+      if (ref.current) ref.current.textContent = value;
+    };
+    if (!record?.online) {
+      for (const meter of [cpuMeter, memMeter, swapMeter, diskMeter]) meter.current?.set(0);
+      for (const ref of [cpuRef, memRef, swapRef, diskRef]) write(ref, "—");
+      return;
+    }
+    cpuMeter.current?.set(record.cpu);
+    memMeter.current?.set(memPercent(record));
+    swapMeter.current?.set(swapPercent(record));
+    diskMeter.current?.set(diskPercent(record));
+
+    const used = (value: number, total: number) =>
+      `${formatBytes(value)} / ${formatBytes(total)}`;
+    write(cpuRef, `${record.cpu.toFixed(1)}%`);
+    write(memRef, used(record.ram, record.ram_total));
+    write(swapRef, used(record.swap, record.swap_total));
+    write(diskRef, used(record.disk, record.disk_total));
+  });
+
+  return (
+    <div className="observer-infopanel panel">
+      <h2 className="chrome">{t("detail.usage")}</h2>
+      <div className="observer-meters">
+        <MeterRow label={t("card.cpu")} meterRef={cpuMeter} valueRef={cpuRef} />
+        <MeterRow label={t("detail.memory")} meterRef={memMeter} valueRef={memRef} />
+        {hasSwap && (
+          <MeterRow label={t("detail.swap")} meterRef={swapMeter} valueRef={swapRef} />
+        )}
+        <MeterRow label={t("detail.disk")} meterRef={diskMeter} valueRef={diskRef} />
+      </div>
+    </div>
+  );
+}
+
+/** Three cells of the enclosing meter grid, so every bar shares one column. */
+function MeterRow({
+  label,
+  meterRef,
+  valueRef,
+}: {
+  label: string;
+  meterRef: React.RefObject<MeterHandle | null>;
+  valueRef: React.RefObject<HTMLSpanElement | null>;
+}) {
+  return (
+    <>
+      <span className="chrome">{label}</span>
+      <Meter ref={meterRef} label={label} />
+      <span ref={valueRef} className="metric observer-meter-value">
+        —
+      </span>
+    </>
   );
 }
 

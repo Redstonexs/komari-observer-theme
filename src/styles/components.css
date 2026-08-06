@@ -340,6 +340,14 @@
   color: var(--observer-text);
 }
 
+/* Fixed offset rather than pushed to the bottom of the cell: both bars sit under
+   identically-built cells, so a fixed offset already lines them up, and it does
+   not move when a neighbouring cell grows a second line. */
+.observer-stat .observer-meter {
+  --observer-meter-size: 4px;
+  margin-block-start: 7px;
+}
+
 /* ---- Grid + cards -------------------------------------------------- */
 
 .observer-grid {
@@ -484,6 +492,13 @@
   gap: 8px;
 }
 
+/* CPU already has a dial in the grid view, and a third bar under three dials is
+   the same number told three ways. The row exists for the compact view, where
+   the dials are gone and CPU would otherwise not appear on the card at all. */
+.observer-grid:not([data-compact="true"]) .observer-meterrow-cpu {
+  display: none;
+}
+
 /* ---- Gauge --------------------------------------------------------- */
 
 .observer-gauge {
@@ -543,6 +558,76 @@
 .observer-gauge-label {
   margin-top: 2px;
   font-size: 9px;
+}
+
+/* ---- Usage meter ---------------------------------------------------- */
+
+/* The flat counterpart to the gauge, for the places a 74px dial does not fit:
+   a table cell, a stat cell, a card row that also has to carry byte figures.
+
+   Colour is the status ramp rather than the accent the gauge sweeps in. The two
+   answer different questions — the dial reports the number, the bar reports
+   whether that number is fine — which is the same division the theme already
+   draws between an accent gauge and the green status dot above it. */
+.observer-meter {
+  --meter-color: var(--observer-ok);
+  position: relative;
+  block-size: var(--observer-meter-size, 6px);
+  border-radius: 1px;
+  background: var(--observer-track);
+  overflow: hidden;
+  /* Hairline gaps punched through track AND fill together, so the bar reads as
+     a graduated scale rather than a web progress bar. It has to be a mask on
+     the track: painted onto the fill it would stretch with the value, since the
+     fill is scaled rather than resized. */
+  mask-image: repeating-linear-gradient(to right, #000 0 4px, transparent 4px 5px);
+}
+
+.observer-meter[data-level="warn"] {
+  --meter-color: var(--observer-warn);
+}
+.observer-meter[data-level="bad"] {
+  --meter-color: var(--observer-bad);
+}
+
+.observer-meter-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--meter-color);
+  /* GSAP writes scaleX 0-1 here. Never width: a fleet view holds hundreds of
+     these and a width tween would relayout every one on every frame. */
+  transform: scaleX(0);
+  transform-origin: left center;
+  /* Crossing a threshold should read as the bar changing state, not as a frame
+     dropping — the fill moves and recolours over the same beat. */
+  transition: background-color var(--observer-dur) var(--observer-ease);
+}
+
+/* The graduations are decoration, and decoration goes before data does. */
+@media (prefers-contrast: more) {
+  .observer-meter {
+    mask-image: none;
+  }
+}
+
+/* Label | bar | figure. The bars of every row share one column, so they line up
+   whatever the labels and figures beside them do. */
+.observer-meters {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 9px;
+}
+
+.observer-meters > .chrome {
+  font-size: 9px;
+}
+
+.observer-meter-value {
+  font-size: 11px;
+  color: var(--observer-text);
+  text-align: end;
+  white-space: nowrap;
 }
 
 /* ---- Sparkline ----------------------------------------------------- */
@@ -624,6 +709,17 @@
 .observer-table-region {
   margin-inline-start: 8px;
   font-size: 10px;
+}
+
+/* Without a floor the column collapses to the width of "45% 3.2G" and the bar
+   under it is too short to compare against the row above. */
+.observer-table td.observer-td-meter {
+  min-width: 104px;
+}
+
+.observer-td-meter .observer-meter {
+  --observer-meter-size: 4px;
+  margin-block-start: 5px;
 }
 
 /* ---- Region marker ------------------------------------------------- */
@@ -720,6 +816,15 @@
 .observer-infopanel h2 {
   margin: 0 0 10px;
   font-size: 10px;
+}
+
+/* Matches the 12px of the dt/dd rows in the panels beside it. */
+.observer-infopanel .observer-meters {
+  gap: 9px;
+}
+
+.observer-infopanel .observer-meter-value {
+  font-size: 12px;
 }
 
 .observer-infopanel dl {

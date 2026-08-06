@@ -11,6 +11,7 @@
 
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { gsap, reducedMotion } from "@/anim/gsap";
+import { USAGE_BAD, USAGE_WARN, usageLevel } from "@/lib/levels";
 
 export interface GaugeHandle {
   /** `percent` is 0-100. */
@@ -30,7 +31,7 @@ interface GaugeProps {
 const SWEEP = 0.75; // three-quarter arc, gap at the bottom
 
 export const Gauge = forwardRef<GaugeHandle, GaugeProps>(function Gauge(
-  { label, size = 74, warnAt = 75, badAt = 90, unit = "%" },
+  { label, size = 74, warnAt = USAGE_WARN, badAt = USAGE_BAD, unit = "%" },
   ref,
 ) {
   const arcRef = useRef<SVGCircleElement | null>(null);
@@ -48,7 +49,7 @@ export const Gauge = forwardRef<GaugeHandle, GaugeProps>(function Gauge(
 
       // Threshold state drives colour AND is mirrored to a data attribute so
       // the label can carry a non-colour cue too.
-      const state = clamped >= badAt ? "bad" : clamped >= warnAt ? "warn" : "ok";
+      const state = usageLevel(clamped, warnAt, badAt);
       if (rootRef.current && rootRef.current.dataset.level !== state) {
         rootRef.current.dataset.level = state;
       }

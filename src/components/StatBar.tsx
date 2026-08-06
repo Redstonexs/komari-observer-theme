@@ -8,6 +8,7 @@ import { useLiveFleet } from "@/hooks/useLiveNode";
 import { useAppStore } from "@/store/app";
 import { formatBytes, formatRate } from "@/lib/format";
 import { useCountTo } from "@/anim/gsap";
+import { Meter, type MeterHandle } from "./Meter";
 
 // Module-level so their identity is stable across renders — useCountTo rebuilds
 // its tween whenever the formatter changes.
@@ -22,6 +23,8 @@ export function StatBar() {
   const onlineRef = useRef<HTMLSpanElement | null>(null);
   const netRef = useRef<HTMLSpanElement | null>(null);
   const trafficRef = useRef<HTMLSpanElement | null>(null);
+  const cpuMeter = useRef<MeterHandle | null>(null);
+  const memMeter = useRef<MeterHandle | null>(null);
 
   // Percentages tween; byte counts and the online tally snap. Interpolating a
   // formatted size like "8.4T" just produces nonsense intermediate values.
@@ -49,9 +52,13 @@ export function StatBar() {
       traffic += r.net_total_up + r.net_total_down;
     }
 
+    const memAvg = ramTotal ? (ramUsed / ramTotal) * 100 : 0;
+
     if (onlineRef.current) onlineRef.current.textContent = `${online.length}/${records.length || nodeCount}`;
     cpu.set(cpuAvg);
-    mem.set(ramTotal ? (ramUsed / ramTotal) * 100 : 0);
+    mem.set(memAvg);
+    cpuMeter.current?.set(cpuAvg);
+    memMeter.current?.set(memAvg);
     if (netRef.current) netRef.current.textContent = `${formatRate(rate)}/s`;
     if (trafficRef.current) trafficRef.current.textContent = formatBytes(traffic);
   });
@@ -61,8 +68,14 @@ export function StatBar() {
   return (
     <div className="observer-statbar panel" data-boot="chrome">
       <Stat label={t("stat.online")} valueRef={onlineRef} />
-      <Stat label={t("stat.cpu")} valueRef={cpu.ref as React.RefObject<HTMLSpanElement | null>} />
-      <Stat label={t("stat.memory")} valueRef={mem.ref as React.RefObject<HTMLSpanElement | null>} />
+      {/* Only the two ratio cells carry a bar. A rate and a cumulative byte
+          count have no ceiling to be a fraction of. */}
+      <Stat label={t("stat.cpu")} valueRef={cpu.ref as React.RefObject<HTMLSpanElement | null>}>
+        <Meter ref={cpuMeter} label={t("stat.cpu")} />
+      </Stat>
+      <Stat label={t("stat.memory")} valueRef={mem.ref as React.RefObject<HTMLSpanElement | null>}>
+        <Meter ref={memMeter} label={t("stat.memory")} />
+      </Stat>
       <Stat label={t("stat.network")} valueRef={netRef} />
       <Stat label={t("stat.traffic")} valueRef={trafficRef} />
     </div>
@@ -72,9 +85,11 @@ export function StatBar() {
 function Stat({
   label,
   valueRef,
+  children,
 }: {
   label: string;
   valueRef: React.RefObject<HTMLSpanElement | null>;
+  children?: React.ReactNode;
 }) {
   return (
     <div className="observer-stat">
@@ -82,6 +97,7 @@ function Stat({
       <span ref={valueRef} className="metric observer-stat-value">
         —
       </span>
+      {children}
     </div>
   );
 }

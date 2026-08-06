@@ -16,6 +16,7 @@ import { useLiveNode } from "@/hooks/useLiveNode";
 import { formatBytes, formatRate, formatUptime, parseTags } from "@/lib/format";
 import { pulse, scrambleIn } from "@/anim/gsap";
 import { Gauge, type GaugeHandle } from "./Gauge";
+import { Meter, type MeterHandle } from "./Meter";
 import { RegionTag } from "./RegionTag";
 import { Sparkline, type SparklineHandle } from "./Sparkline";
 import { useAppStore } from "@/store/app";
@@ -34,10 +35,14 @@ export function NodeCard({ node }: NodeCardProps) {
   const cpuGauge = useRef<GaugeHandle | null>(null);
   const memGauge = useRef<GaugeHandle | null>(null);
   const diskGauge = useRef<GaugeHandle | null>(null);
+  const cpuMeter = useRef<MeterHandle | null>(null);
+  const memMeter = useRef<MeterHandle | null>(null);
+  const diskMeter = useRef<MeterHandle | null>(null);
   const netSpark = useRef<SparklineHandle | null>(null);
 
   const upRef = useRef<HTMLSpanElement | null>(null);
   const downRef = useRef<HTMLSpanElement | null>(null);
+  const cpuTextRef = useRef<HTMLSpanElement | null>(null);
   const memTextRef = useRef<HTMLSpanElement | null>(null);
   const diskTextRef = useRef<HTMLSpanElement | null>(null);
   const uptimeRef = useRef<HTMLSpanElement | null>(null);
@@ -63,8 +68,16 @@ export function NodeCard({ node }: NodeCardProps) {
       cpuGauge.current?.set(0);
       memGauge.current?.set(0);
       diskGauge.current?.set(0);
+      cpuMeter.current?.set(0);
+      memMeter.current?.set(0);
+      diskMeter.current?.set(0);
       if (upRef.current) upRef.current.textContent = "—";
       if (downRef.current) downRef.current.textContent = "—";
+      // Blanked with everything else: an emptied bar beside a stale byte count
+      // reads as "this box just freed all its memory", not as "no data".
+      if (cpuTextRef.current) cpuTextRef.current.textContent = "—";
+      if (memTextRef.current) memTextRef.current.textContent = "—";
+      if (diskTextRef.current) diskTextRef.current.textContent = "—";
       if (uptimeRef.current) uptimeRef.current.textContent = "—";
       if (loadRef.current) loadRef.current.textContent = "—";
       return;
@@ -76,12 +89,16 @@ export function NodeCard({ node }: NodeCardProps) {
     cpuGauge.current?.set(record.cpu);
     memGauge.current?.set(mem);
     diskGauge.current?.set(disk);
+    cpuMeter.current?.set(record.cpu);
+    memMeter.current?.set(mem);
+    diskMeter.current?.set(disk);
 
     // Combined throughput reads better at card size than two overlaid series.
     netSpark.current?.push(record.net_in + record.net_out);
 
     if (upRef.current) upRef.current.textContent = formatRate(record.net_out);
     if (downRef.current) downRef.current.textContent = formatRate(record.net_in);
+    if (cpuTextRef.current) cpuTextRef.current.textContent = `${record.cpu.toFixed(1)}%`;
     if (memTextRef.current) {
       memTextRef.current.textContent = `${formatBytes(record.ram)}/${formatBytes(record.ram_total)}`;
     }
@@ -120,19 +137,30 @@ export function NodeCard({ node }: NodeCardProps) {
         <Gauge ref={diskGauge} label={t("card.disk")} />
       </div>
 
+      {/* Meters beside the dials rather than instead of them: the dial says what
+          the number is, the bar says how full that leaves the box, and the bar
+          is the only one of the two that survives into the compact view. */}
+      <div className="observer-meters observer-card-meters">
+        <span className="chrome observer-meterrow-cpu">{t("card.cpu")}</span>
+        <Meter ref={cpuMeter} label={t("card.cpu")} className="observer-meterrow-cpu" />
+        <span ref={cpuTextRef} className="metric observer-meter-value observer-meterrow-cpu">
+          —
+        </span>
+
+        <span className="chrome">{t("card.memory")}</span>
+        <Meter ref={memMeter} label={t("card.memory")} />
+        <span ref={memTextRef} className="metric observer-meter-value">
+          —
+        </span>
+
+        <span className="chrome">{t("card.disk")}</span>
+        <Meter ref={diskMeter} label={t("card.disk")} />
+        <span ref={diskTextRef} className="metric observer-meter-value">
+          —
+        </span>
+      </div>
+
       <dl className="observer-card-stats">
-        <div>
-          <dt className="chrome">{t("card.memory")}</dt>
-          <dd className="metric">
-            <span ref={memTextRef}>—</span>
-          </dd>
-        </div>
-        <div>
-          <dt className="chrome">{t("card.disk")}</dt>
-          <dd className="metric">
-            <span ref={diskTextRef}>—</span>
-          </dd>
-        </div>
         <div>
           <dt className="chrome">{t("card.load")}</dt>
           <dd className="metric">

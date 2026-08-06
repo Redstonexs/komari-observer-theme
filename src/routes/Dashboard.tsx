@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { useAppStore, type SortKey } from "@/store/app";
 import { liveBus } from "@/store/live";
 import { useFleetStructure, useLiveNode } from "@/hooks/useLiveNode";
+import { Meter, type MeterHandle } from "@/components/Meter";
 import { NodeCard } from "@/components/NodeCard";
 import { RegionTag } from "@/components/RegionTag";
 import { StatBar } from "@/components/StatBar";
@@ -274,12 +275,16 @@ function NodeTable({ nodes }: { nodes: NodeInfo[] }) {
 }
 
 function NodeRow({ node }: { node: NodeInfo }) {
+  const { t } = useTranslation();
   const rowRef = useRef<HTMLTableRowElement | null>(null);
   const cpuRef = useRef<HTMLSpanElement | null>(null);
   const memRef = useRef<HTMLSpanElement | null>(null);
   const diskRef = useRef<HTMLSpanElement | null>(null);
   const netRef = useRef<HTMLSpanElement | null>(null);
   const upRef = useRef<HTMLSpanElement | null>(null);
+  const cpuMeter = useRef<MeterHandle | null>(null);
+  const memMeter = useRef<MeterHandle | null>(null);
+  const diskMeter = useRef<MeterHandle | null>(null);
 
   useLiveNode(node.uuid, (record) => {
     const row = rowRef.current;
@@ -291,15 +296,23 @@ function NodeRow({ node }: { node: NodeInfo }) {
       for (const ref of [cpuRef, memRef, diskRef, netRef, upRef]) {
         if (ref.current) ref.current.textContent = "—";
       }
+      for (const meter of [cpuMeter, memMeter, diskMeter]) meter.current?.set(0);
       return;
     }
+    const mem = memPercent(record);
+    const disk = diskPercent(record);
+
     if (cpuRef.current) cpuRef.current.textContent = `${record.cpu.toFixed(1)}%`;
     if (memRef.current) {
-      memRef.current.textContent = `${memPercent(record).toFixed(0)}% ${formatBytes(record.ram)}`;
+      memRef.current.textContent = `${mem.toFixed(0)}% ${formatBytes(record.ram)}`;
     }
     if (diskRef.current) {
-      diskRef.current.textContent = `${diskPercent(record).toFixed(0)}% ${formatBytes(record.disk)}`;
+      diskRef.current.textContent = `${disk.toFixed(0)}% ${formatBytes(record.disk)}`;
     }
+    cpuMeter.current?.set(record.cpu);
+    memMeter.current?.set(mem);
+    diskMeter.current?.set(disk);
+
     if (netRef.current) {
       netRef.current.textContent = `↑${formatRate(record.net_out)} ↓${formatRate(record.net_in)}`;
     }
@@ -319,14 +332,19 @@ function NodeRow({ node }: { node: NodeInfo }) {
           <RegionTag region={node.region} className="chrome observer-table-region" />
         )}
       </td>
-      <td className="metric">
+      {/* The three ratio columns carry a bar under the figure — it is what makes
+          a 100-row table scannable without reading every number. */}
+      <td className="metric observer-td-meter">
         <span ref={cpuRef}>—</span>
+        <Meter ref={cpuMeter} label={t("card.cpu")} />
       </td>
-      <td className="metric">
+      <td className="metric observer-td-meter">
         <span ref={memRef}>—</span>
+        <Meter ref={memMeter} label={t("card.memory")} />
       </td>
-      <td className="metric">
+      <td className="metric observer-td-meter">
         <span ref={diskRef}>—</span>
+        <Meter ref={diskMeter} label={t("card.disk")} />
       </td>
       <td className="metric">
         <span ref={netRef}>—</span>
