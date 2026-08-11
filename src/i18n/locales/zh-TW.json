@@ -107,11 +107,15 @@
   },
   "uptime": {
     "title": "線上率",
-    "note": "每個方塊代表一個時間片，該時間片內沒有任何回報即判定為離線。",
+    "note": "每個方塊代表 {{slot}}。離線由回報間隔推斷：中斷超過 {{gap}} 才判定為離線。",
+    "noteBasic": "每個方塊代表 {{slot}}。",
     "availability": "可用率",
+    "now": "現在",
     "slotOnline": "線上",
     "slotOffline": "離線",
-    "slotUnknown": "無資料"
+    "slotPartial": "部分離線",
+    "slotUnknown": "無資料",
+    "downFor": "離線 {{duration}}"
   },
   "settings": {
     "title": "顯示",

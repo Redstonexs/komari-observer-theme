@@ -37,6 +37,49 @@ export function formatUptime(seconds: number): string {
   return `${m}m`;
 }
 
+/**
+ * Wall clock, forced to a 24-hour cycle.
+ *
+ * A timeline axis puts a label every few blocks, and a locale that appends
+ * "PM" makes those labels collide long before the ticks do. `hour12: false`
+ * alone yields "24:00" in some locales, hence the explicit cycle.
+ */
+export function formatClock(epochMs: number): string {
+  return new Date(epochMs).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    hourCycle: "h23",
+  });
+}
+
+/** Calendar day without the year — no window this theme draws spans one. */
+export function formatDay(epochMs: number): string {
+  return new Date(epochMs).toLocaleDateString([], { month: "numeric", day: "numeric" });
+}
+
+/** An absolute instant, for a readout that has to be unambiguous. */
+export function formatStamp(epochMs: number): string {
+  return `${formatDay(epochMs)} ${formatClock(epochMs)}`;
+}
+
+/**
+ * Compact elapsed time from milliseconds, e.g. 45s / 18m / 2h 5m / 1d 3h.
+ *
+ * Distinct from `formatUptime`, which takes seconds and is only ever asked
+ * about spans of days — an outage is usually minutes, and rounding one to "0h"
+ * would hide it.
+ */
+export function formatDurationMs(ms: number): string {
+  const seconds = Math.round(Math.max(0, ms) / 1000);
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return minutes % 60 ? `${hours}h ${minutes % 60}m` : `${hours}h`;
+  return hours % 24 ? `${Math.floor(hours / 24)}d ${hours % 24}h` : `${Math.floor(hours / 24)}d`;
+}
+
 /** Relative age of a timestamp, for staleness indicators. */
 export function formatAge(epochMs: number, now = Date.now()): string {
   if (!epochMs) return "never";

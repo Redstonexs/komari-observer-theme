@@ -107,11 +107,15 @@
   },
   "uptime": {
     "title": "在线率",
-    "note": "每个方块代表一个时间片，该时间片内没有任何上报即判定为离线。",
+    "note": "每个方块代表 {{slot}}。离线由上报间隔推断：中断超过 {{gap}} 才判定为离线。",
+    "noteBasic": "每个方块代表 {{slot}}。",
     "availability": "可用率",
+    "now": "现在",
     "slotOnline": "在线",
     "slotOffline": "离线",
-    "slotUnknown": "无数据"
+    "slotPartial": "部分离线",
+    "slotUnknown": "无数据",
+    "downFor": "离线 {{duration}}"
   },
   "settings": {
     "title": "显示",

@@ -8,8 +8,9 @@ export interface Point {
 /**
  * Reduces a series to at most `target` points by averaging fixed buckets.
  *
- * Load history arrives already downsampled to ~500 points, but PING history does
- * not: `internal/metricstore/ping_records.go` caps a query at **4000** points per
+ * Load history arrives already downsampled — at a cadence that varies with the
+ * range, so never assume a fixed spacing — but PING history does not:
+ * `internal/metricstore/ping_records.go` caps a query at **4000** points per
  * task. A node covered by three probes over 72 hours is therefore ~12k points
  * competing for roughly 600 CSS pixels — the line renders as a solid block and
  * the SVG path carries tens of thousands of commands for no gain.

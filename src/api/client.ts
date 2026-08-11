@@ -129,8 +129,10 @@ export function getRecentReports(uuid: string): Promise<V1Report[]> {
 /**
  * Historical load records in the FLAT models.Record shape.
  *
- * Server-side downsampled to ~500 points regardless of range, so do not
- * decimate again and do not assume a fixed sample cadence.
+ * Server-side downsampled, so do not decimate again — and note that the
+ * cadence is NOT fixed: a one-day window comes back at a few minutes per
+ * record while a one-week window comes back roughly hourly. Anything reasoning
+ * about the spacing has to measure it from the response.
  *
  * Omit `loadType` to receive every field plus `gpu_devices`. Passing
  * `load_type=gpu` returns HTTP 400 — the allowlist omits it (server bug).
@@ -139,9 +141,11 @@ export function getLoadRecords(
   uuid: string,
   hours = 4,
   loadType?: LoadType,
+  init?: RequestInit,
 ): Promise<LoadRecordsResponse> {
   return unwrap<LoadRecordsResponse>(
     `/api/records/load${qs({ uuid, hours, load_type: loadType })}`,
+    init,
   );
 }
 

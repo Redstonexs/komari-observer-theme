@@ -7,22 +7,24 @@
  * and the dashboard-level pages exist only as per-node comparisons.
  *
  * Availability is DERIVED, not measured. Komari keeps no uptime history —
- * `uptime` is commented out of models.Record — so the strip buckets load
- * records into fixed slots and treats a slot with zero records as downtime.
- * That inference is stated in the UI rather than presented as fact.
+ * `uptime` is commented out of models.Record — so downtime is inferred from
+ * the gaps between load records; see lib/uptime.ts for why it is read off gaps
+ * rather than off block occupancy. That inference is stated in the UI rather
+ * than presented as fact.
  */
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getLoadRecords, getPingRecords, getPingTasks } from "@/api/client";
 import type { LoadRecord, PingRecord, PublicPingTask } from "@/api/types";
 import { LineChart, type Series } from "@/components/LineChart";
+import { UptimeStrip } from "@/components/UptimeStrip";
 import { LOSS_THRESHOLDS } from "@/config/settings";
 import { useAppStore } from "@/store/app";
-import { formatLatency } from "@/lib/format";
+import { formatDurationMs, formatLatency } from "@/lib/format";
 import { downsample } from "@/lib/series";
-
-type SlotState = "online" | "offline" | "unknown";
+import { buildUptime } from "@/lib/uptime";
+import { fadeToPending, sweepReveal, useCountTo } from "@/anim/gsap";
 
 /** Each block owns its own window, so neither control can surprise the other. */
 const PING_RANGES = [4, 12, 24, 72] as const;
@@ -30,9 +32,22 @@ const UPTIME_RANGES = [24, 72, 168] as const;
 
 /** Slot width the availability strip aims for, gap included. */
 const SLOT_PITCH_PX = 28;
-/** Bucket sizes the strip may pick from, in minutes. A reader can reason about
- *  "3h"; nothing is gained by offering them "3h 37m". */
-const SLOT_MINUTES = [30, 60, 90, 120, 180, 240, 360, 720] as const;
+/**
+ * Block widths the strip may pick from, in minutes.
+ *
+ * Purely a density choice now: gap-based inference does not care whether a
+ * block is wider than the server's sampling interval, so this ladder answers
+ * "how many blocks fit" and nothing else. Round numbers only — a reader can
+ * reason about "3h", and nothing is gained by offering them "3h 37m".
+ */
+const SLOT_MINUTES = [10, 15, 20, 30, 60, 90, 120, 180, 240, 360, 720] as const;
+/**
+ * How long the strip stays grey before it starts resolving.
+ *
+ * A cached response can land in a few milliseconds, and a reveal that begins
+ * before the grey has been seen reads as a glitch rather than as a refresh.
+ */
+const PENDING_DWELL_MS = 180;
 
 /** `formatLatency` returns an em dash for "no sample" — don't suffix that. */
 const latency = (ms: number) => (ms >= 0 ? `${formatLatency(ms)}ms` : "—");
@@ -215,21 +230,31 @@ export function NodeLatency({ uuid }: { uuid: string }) {
  * Availability
  * ================================================================== */
 
+interface Snapshot {
+  records: LoadRecord[];
+  /** The fetch time travels with the records: the window is anchored to it, so
+   *  a resize re-slices the same data instead of sliding out from under it. */
+  fetchedAt: number;
+  /** ...and so does the range that was asked for. See `snapshot` below. */
+  hours: number;
+}
+
 export function NodeUptime({ uuid }: { uuid: string }) {
   const { t } = useTranslation();
   const recordEnabled = useAppStore((s) => s.publicSettings?.record_enabled ?? true);
   const [hours, setHours] = useState(24);
-  // The fetch time travels with the records: bucketing is re-run on resize, and
-  // re-anchoring the slots to a newer "now" each time would slide the window
-  // out from under the data it is describing.
-  const [data, setData] = useState<{ records: LoadRecord[]; fetchedAt: number } | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<Snapshot | null>(null);
+  // Which request failed, not merely that one did: clearing a boolean from the
+  // fetch effect would paint one frame of "no history" over the range the user
+  // just picked, because effects run after the browser has already painted.
+  const [failedFor, setFailedFor] = useState<string | null>(null);
 
-  // The strip spans the page, so a fixed bucket count cannot serve every width:
+  // The strip spans the page, so a fixed block count cannot serve every width:
   // the 24 that read well in a half-width panel stretch into bars across a
-  // desktop, and buckets fine enough for a desktop become confetti on a phone.
+  // desktop, and blocks fine enough for a desktop become confetti on a phone.
   // Measured the way LineChart measures its host.
   const hostRef = useRef<HTMLDivElement | null>(null);
+  const stripRef = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);
   useLayoutEffect(() => {
     const host = hostRef.current;
@@ -241,79 +266,119 @@ export function NodeUptime({ uuid }: { uuid: string }) {
     return () => observer.disconnect();
   }, []);
 
-  const slotMinutes = useMemo(() => {
+  const slotMs = useMemo(() => {
     const ideal = (hours * 60) / Math.max(8, Math.round(width / SLOT_PITCH_PX));
-    // A bucket too small to span several samples turns ordinary cadence jitter
-    // into fake downtime. The server hands back ~500 points per window whatever
-    // the range, so keep a bucket worth at least ~4 of them.
-    const floor = Math.max(30, (4 * hours * 60) / 500);
-    const allowed = SLOT_MINUTES.filter((m) => m >= floor);
-    return (allowed.length ? allowed : [SLOT_MINUTES[SLOT_MINUTES.length - 1]]).reduce((best, m) =>
+    const minutes = SLOT_MINUTES.reduce((best, m) =>
       Math.abs(m - ideal) < Math.abs(best - ideal) ? m : best,
     );
+    return minutes * 60_000;
   }, [hours, width]);
 
   useEffect(() => {
     if (!recordEnabled) return;
-    let cancelled = false;
-    setLoading(true);
-    getLoadRecords(uuid, hours, "cpu")
+    const controller = new AbortController();
+    getLoadRecords(uuid, hours, "cpu", { signal: controller.signal })
       .then((res) => {
-        if (!cancelled) setData({ records: res.records ?? [], fetchedAt: Date.now() });
+        if (!controller.signal.aborted) {
+          setData({ records: res.records ?? [], fetchedAt: Date.now(), hours });
+        }
       })
       .catch(() => {
-        if (!cancelled) setData(null);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+        // An abort is this component replacing its own request, not a failure.
+        if (!controller.signal.aborted) setFailedFor(`${uuid}|${hours}`);
       });
-    return () => {
-      cancelled = true;
-    };
+    // Ranges clicked in quick succession would otherwise race each other, and
+    // the loser would still have cost the server a full window of records.
+    return () => controller.abort();
   }, [uuid, hours, recordEnabled]);
 
-  // Bucketing is pure, so a resize re-slices the records already in hand rather
-  // than asking the server for the same window again.
-  const { slots, availability } = useMemo(() => {
-    const empty = { slots: [] as SlotState[], availability: 0 };
-    if (!data) return empty;
+  /**
+   * Records may only ever be read at the range they were fetched for.
+   *
+   * This is the fix for the range-switch flash. The server's cadence is a
+   * function of the window — a day comes back every few minutes, a week comes
+   * back hourly — so hourly records sliced into the 30-minute blocks of a
+   * 1-day view left every second block empty and reported 50% availability
+   * for a node that had never missed a beat.
+   */
+  const snapshot = data !== null && data.hours === hours ? data : null;
+  const failed = failedFor === `${uuid}|${hours}`;
+  const pending = snapshot === null && !failed;
 
-    const slotMs = slotMinutes * 60_000;
-    const count = Math.floor((hours * 3_600_000) / slotMs);
-    const start = data.fetchedAt - count * slotMs;
-    const next: SlotState[] = Array.from({ length: count }, () => "offline");
-    let earliest = Infinity;
+  const uptime = useMemo(
+    () =>
+      buildUptime({
+        // No snapshot yet: the geometry is still built for the range that was
+        // just picked, so the strip greys out at its new block count and the
+        // axis is already correct when the colour arrives.
+        times: snapshot ? snapshot.records.map((r) => Date.parse(r.time)) : [],
+        endsAt: snapshot ? snapshot.fetchedAt : Date.now(),
+        spanMs: hours * 3_600_000,
+        slotMs,
+      }),
+    [snapshot, hours, slotMs],
+  );
 
-    for (const record of data.records) {
-      const time = Date.parse(record.time);
-      if (!Number.isFinite(time)) continue;
-      earliest = Math.min(earliest, time);
-      const index = Math.floor((time - start) / slotMs);
-      if (index >= 0 && index < count) next[index] = "online";
-    }
+  // Written straight to the DOM rather than through React: the readout tweens
+  // alongside the sweep, and re-rendering the panel 60 times a second to move
+  // one number would be absurd.
+  const showDash = useRef(true);
+  const formatAvailability = useCallback(
+    (value: number) => (showDash.current ? "—" : `${value.toFixed(2)}%`),
+    [],
+  );
+  const pct = useCountTo(formatAvailability, { duration: 0.6 });
+  const setPct = pct.set;
 
-    // Before the node's first record it was not "down", it was unknown —
-    // a node added yesterday must not read as a week of downtime.
-    if (Number.isFinite(earliest)) {
-      const firstKnown = Math.floor((earliest - start) / slotMs);
-      for (let i = 0; i < Math.min(firstKnown, count); i++) next[i] = "unknown";
-    } else {
-      next.fill("unknown");
-    }
+  const greyedAt = useRef(0);
+  useEffect(() => {
+    if (!pending) return;
+    greyedAt.current = Date.now();
+    showDash.current = true;
+    // Runs the readout down to zero behind the dash, so the count-up that
+    // follows starts from nothing rather than from the old range's figure.
+    setPct(0);
+    fadeToPending(stripRef.current);
+    // Deliberately keyed on `pending` alone. `setPct` is a fresh closure over a
+    // stable ref on every render, so listing it would re-grey the strip on every
+    // unrelated re-render.
+  }, [pending]);
 
-    const known = next.filter((s) => s !== "unknown");
-    const up = known.filter((s) => s === "online").length;
-    return { slots: next, availability: known.length ? (up / known.length) * 100 : 0 };
-  }, [data, hours, slotMinutes]);
+  // Replayed when the data set changes identity — a range switch, a node
+  // switch, a refetch — but NOT when a resize re-slices the records in hand.
+  const revealKey = snapshot ? `${uuid}|${hours}|${snapshot.fetchedAt}` : null;
+  useEffect(() => {
+    if (revealKey === null) return;
+    const timeline = sweepReveal(stripRef.current, {
+      delay: Math.max(0, PENDING_DWELL_MS - (Date.now() - greyedAt.current)) / 1000,
+      onStart: () => {
+        // A window with too little data to measure has no percentage to show,
+        // and 0.00% would be a claim rather than an absence.
+        showDash.current = uptime.availability < 0;
+        setPct(Math.max(0, uptime.availability));
+      },
+    });
+    return () => {
+      timeline?.kill();
+    };
+    // Keyed on the identity string alone: `uptime` is rebuilt on every resize,
+    // and depending on it would replay the sweep as the window is dragged.
+  }, [revealKey]);
 
   if (!recordEnabled) return null;
+
+  const empty = failed || (snapshot !== null && snapshot.records.length === 0);
 
   return (
     <div className="observer-chartblock panel">
       <div className="observer-history-head">
         <h3 className="chrome">{t("uptime.title")}</h3>
         <div className="observer-uptime-head-right">
-          <span className="metric observer-uptime-pct">{availability.toFixed(2)}%</span>
+          <span
+            ref={pct.ref as React.RefObject<HTMLSpanElement | null>}
+            className="metric observer-uptime-pct"
+            data-pending={pending ? "true" : undefined}
+          />
           <div className="observer-segmented">
             {UPTIME_RANGES.map((h) => (
               <button key={h} type="button" data-active={hours === h} onClick={() => setHours(h)}>
@@ -325,36 +390,33 @@ export function NodeUptime({ uuid }: { uuid: string }) {
       </div>
 
       {/* Always rendered, empty or not: it is what the ResizeObserver watches,
-          and the slot count is decided from its width. */}
+          and the block count is decided from its width. */}
       <div ref={hostRef} className="observer-uptime-host">
-        {loading && slots.length === 0 ? (
-          <p className="observer-empty chrome">…</p>
-        ) : slots.length === 0 ? (
+        {empty ? (
           <p className="observer-empty">{t("detail.noHistory")}</p>
         ) : (
-          <div
-            className="observer-uptime-strip observer-uptime-strip-lg"
-            role="img"
-            aria-label={`${t("uptime.availability")} ${availability.toFixed(2)}%`}
-          >
-            {slots.map((slot, i) => (
-              <span
-                key={i}
-                className="observer-uptime-slot"
-                data-slot={slot}
-                title={t(
-                  slot === "online"
-                    ? "uptime.slotOnline"
-                    : slot === "offline"
-                      ? "uptime.slotOffline"
-                      : "uptime.slotUnknown",
-                )}
-              />
-            ))}
-          </div>
+          <UptimeStrip
+            slots={uptime.slots}
+            from={uptime.from}
+            to={uptime.to}
+            pending={pending}
+            width={width}
+            stripRef={stripRef}
+            label={`${t("uptime.availability")} ${
+              uptime.availability >= 0 ? `${uptime.availability.toFixed(2)}%` : t("uptime.slotUnknown")
+            }`}
+          />
         )}
       </div>
-      <p className="chrome observer-note">{t("uptime.note")}</p>
+
+      <p className="chrome observer-note">
+        {uptime.thresholdMs > 0
+          ? t("uptime.note", {
+              slot: formatDurationMs(slotMs),
+              gap: formatDurationMs(uptime.thresholdMs),
+            })
+          : t("uptime.noteBasic", { slot: formatDurationMs(slotMs) })}
+      </p>
     </div>
   );
 }

@@ -13,6 +13,8 @@
  *   - the WS and RPC channels return DIFFERENT shapes for the same data
  *   - ping values are milliseconds, and NEGATIVE means packet loss
  *   - /api/records/load rejects load_type=gpu with HTTP 400
+ *   - /api/records/load returns a DIFFERENT sample cadence per range: every
+ *     few minutes for a day, roughly hourly for a week
  *
  * Usage:
  *   node scripts/mock-server.mjs [--port 25774] [--nodes 12] [--break tier,...]
@@ -207,19 +209,65 @@ function latestStatusMap() {
 
 /* ---- history ------------------------------------------------------ */
 
+/**
+ * Sample spacing by range, in minutes.
+ *
+ * The detail that matters most to the availability strip: the cadence is NOT
+ * constant. A one-day window comes back every few minutes while a one-week
+ * window comes back roughly hourly, so any client that assumes one fixed
+ * spacing — or that reuses one window's records at another window's
+ * resolution — paints the hourly data as alternating up/down.
+ */
+function cadenceMinutes(hours) {
+  if (hours <= 24) return 3;
+  if (hours <= 72) return 30;
+  return 60;
+}
+
+/**
+ * Scripted downtime, as [node index, hours ago it started, length in hours].
+ *
+ * Records simply stop for the duration — which is all a real outage looks like
+ * from the outside, and the only thing availability can be inferred from.
+ * Node 1's is deliberately shorter than the weekly sampling interval, so it is
+ * visible at 1 day and genuinely invisible at 7.
+ */
+const OUTAGES = [
+  [0, 9, 3],
+  // Deliberately off the hour: a real outage does not respect block boundaries,
+  // and blocks it only partly covers have to render as partly down.
+  [0, 16.2, 0.7],
+  [0, 30, 0.5],
+  [1, 2, 0.35],
+  [3, 50, 6],
+];
+
+/** Nodes registered recently: a longer window has nothing to show before this,
+ *  which must read as "unknown" rather than as days of downtime. */
+const FIRST_SEEN_HOURS = { 2: 48 };
+
 function loadRecords(uuid, hours) {
   const i = nodes.findIndex((n) => n.uuid === uuid);
   if (i < 0) return [];
   const node = nodes[i];
-  // The real server downsamples to ~500 points regardless of range.
-  const count = 500;
-  const span = hours * 3600_000;
-  const step = span / count;
+
   const now = Date.now();
-  return Array.from({ length: count }, (_, k) => {
-    const t = now - span + k * step;
+  const step = cadenceMinutes(hours) * 60_000;
+  const start = now - hours * 3600_000;
+  const firstSeen = now - (FIRST_SEEN_HOURS[i] ?? Infinity) * 3600_000;
+  const outages = OUTAGES.filter(([n]) => n === i).map(([, ago, length]) => [
+    now - ago * 3600_000,
+    now - (ago - length) * 3600_000,
+  ]);
+
+  const out = [];
+  for (let t = start; t <= now; t += step) {
+    if (t < firstSeen) continue;
+    if (outages.some(([from, to]) => t >= from && t < to)) continue;
+
+    const k = out.length;
     const phase = t / 600_000 + i;
-    return {
+    out.push({
       client: uuid,
       time: new Date(t).toISOString(),
       cpu: +(38 + Math.sin(phase) * 22 + Math.sin(phase * 3.3) * 7).toFixed(2),
@@ -241,8 +289,9 @@ function loadRecords(uuid, hours) {
       process: 130 + (k % 40),
       connections: 50 + (k % 25),
       connections_udp: 6,
-    };
-  });
+    });
+  }
+  return out;
 }
 
 /** Probe definitions, shared by /api/task/ping and the record generator. */

@@ -107,11 +107,15 @@
   },
   "uptime": {
     "title": "稼働率",
-    "note": "各ブロックは 1 つの時間枠です。その枠に記録がなければ停止として扱われます。",
+    "note": "各ブロックの幅は {{slot}} です。停止は記録の間隔から推定し、{{gap}} を超えて途切れた場合のみ停止と判定します。",
+    "noteBasic": "各ブロックの幅は {{slot}} です。",
     "availability": "可用性",
+    "now": "現在",
     "slotOnline": "稼働",
     "slotOffline": "停止",
-    "slotUnknown": "データなし"
+    "slotPartial": "一部停止",
+    "slotUnknown": "データなし",
+    "downFor": "停止 {{duration}}"
   },
   "settings": {
     "title": "表示",

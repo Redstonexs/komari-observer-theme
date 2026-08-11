@@ -1012,31 +1012,76 @@
 /* ---- Uptime strip -------------------------------------------------- */
 
 .observer-uptime-strip {
+  position: relative;
   display: flex;
   gap: 2px;
   min-width: 0;
 }
 
+/* Grey is the RESTING state, never a state a block is left in: the colour
+   arrives on an overlay whose opacity the sweep animates. Tweening an opacity
+   keeps a 90-block strip off the colour engine for the length of the sweep,
+   which tweening `background` would not. */
 .observer-uptime-slot {
+  --reveal: 1;
+  --down: 0;
+  position: relative;
   flex: 1;
   min-width: 2px;
   height: 20px;
   border-radius: 1px;
+  overflow: hidden;
+  background: var(--observer-track);
+}
+
+.observer-uptime-slot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: var(--reveal);
+  /* A block down for two minutes of thirty and a block down for all thirty are
+     not the same event, so the fill is mixed by the ratio rather than picked
+     from one of two swatches. */
+  background: color-mix(in oklch, var(--observer-bad) calc(var(--down) * 100%), var(--observer-ok));
+}
+
+/* Distinct from the resting grey on purpose: "nothing was recorded here" and
+   "the next window has not arrived yet" must not look like the same thing. */
+.observer-uptime-slot[data-slot="unknown"]::before {
   background: var(--observer-idle);
 }
 
-.observer-uptime-slot[data-slot="online"] {
-  background: var(--observer-ok);
+/* Blocks mounted while the next window loads start dark and are brought up by
+   the sweep. A block left over from the previous window carries an inline
+   --reveal instead, which fadeToPending runs down. */
+.observer-uptime-slot[data-slot="pending"] {
+  --reveal: 0;
 }
-.observer-uptime-slot[data-slot="offline"] {
-  background: var(--observer-bad);
+
+.observer-uptime-slot[data-active="true"] {
+  outline: 1px solid var(--observer-line-strong);
+  outline-offset: 1px;
 }
-.observer-uptime-slot[data-slot="unknown"] {
-  background: var(--observer-track);
+
+/* Rides ahead of the resolving blocks. Absolutely positioned, so it takes no
+   part in the flex row it lives in. */
+.observer-uptime-sweep {
+  position: absolute;
+  inset-block: -2px;
+  inset-inline-start: -1px;
+  width: 2px;
+  opacity: 0;
+  pointer-events: none;
+  background: var(--observer-accent);
+  box-shadow: 0 0 12px 1px color-mix(in oklch, var(--observer-accent) 60%, transparent);
 }
 
 .observer-uptime-pct {
   font-size: 12px;
+  transition: opacity var(--observer-dur) var(--observer-ease);
+}
+.observer-uptime-pct[data-pending="true"] {
+  opacity: 0.45;
 }
 
 /* ---- Boot / notices ------------------------------------------------ */
@@ -1363,8 +1408,159 @@
   border-radius: 2px;
 }
 
+/* ---- Uptime axis and readout --------------------------------------- */
+
+.observer-uptime-body {
+  position: relative;
+}
+
+.observer-uptime-plot {
+  position: relative;
+}
+
+.observer-uptime-axis {
+  position: relative;
+  height: 24px;
+  margin-top: 7px;
+}
+
+.observer-uptime-tick {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.observer-uptime-tick i {
+  width: 1px;
+  height: 5px;
+  background: var(--observer-line-strong);
+}
+
+.observer-uptime-tick em {
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  color: var(--observer-text-faint);
+}
+
+/* Centred labels would hang off the panel at either end of the axis. */
+.observer-uptime-tick[data-edge="start"] {
+  transform: none;
+  align-items: flex-start;
+}
+.observer-uptime-tick[data-edge="end"] {
+  transform: translateX(-100%);
+  align-items: flex-end;
+}
+.observer-uptime-tick[data-edge="end"] em {
+  color: var(--observer-text-muted);
+}
+
+/* Hangs below the axis and floats over the legend rather than reserving a band
+   of empty space for itself: it is opaque and shadowed, the legend underneath
+   is static reference text, and a permanently blank strip of panel reads as a
+   layout fault at phone widths. */
+.observer-uptime-tip {
+  position: absolute;
+  top: calc(100% + 2px);
+  z-index: 2;
+  min-width: 132px;
+  /* Half the strip less the offset: the tip flips sides at the midpoint, so
+     this is exactly the room the losing side is guaranteed. */
+  max-width: calc(50% - 12px);
+  padding: 7px 9px;
+  border: var(--observer-hairline) solid var(--observer-line);
+  border-radius: var(--observer-radius);
+  /* Solid, not the translucent panel surface: this sits on top of the very
+     axis it is reading from. */
+  background: var(--observer-surface-solid);
+  box-shadow: 0 8px 24px -10px oklch(0 0 0 / 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--observer-dur-fast) var(--observer-ease);
+}
+.observer-uptime-tip[data-open="true"] {
+  opacity: 1;
+}
+
+.observer-uptime-tip-time {
+  font-size: 10px;
+  color: var(--observer-text);
+}
+
+.observer-uptime-tip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.observer-uptime-tip-row[data-slot="online"] {
+  --status-color: var(--observer-ok);
+}
+.observer-uptime-tip-row[data-slot="down"] {
+  --status-color: var(--observer-bad);
+}
+.observer-uptime-tip-row[data-slot="unknown"] {
+  --status-color: var(--observer-idle);
+}
+
+.observer-uptime-tip-state {
+  font-size: 10px;
+  color: var(--observer-text-muted);
+}
+
+.observer-uptime-tip-down {
+  margin-inline-start: auto;
+  font-size: 10px;
+  color: var(--observer-text);
+}
+
+/* Grey means two different things on this strip and red carries the alarm, so
+   the key is spelled out rather than left to colour alone. */
+.observer-uptime-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 8px;
+  font-size: 9px;
+  color: var(--observer-text-faint);
+}
+
+.observer-uptime-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.observer-uptime-legend span::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+.observer-uptime-legend [data-slot="online"]::before {
+  background: var(--observer-ok);
+}
+.observer-uptime-legend [data-slot="down"]::before {
+  background: var(--observer-bad);
+}
+.observer-uptime-legend [data-slot="unknown"]::before {
+  background: var(--observer-idle);
+}
+
 @media (max-width: 640px) {
   .observer-pingstat-range {
     display: none;
+  }
+
+  /* The readout wraps to two or three lines at this width, so it needs more of
+     the strip than the half it flips within on a desktop. */
+  .observer-uptime-tip {
+    max-width: calc(72% - 12px);
   }
 }

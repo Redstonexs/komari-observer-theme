@@ -187,6 +187,94 @@ export function revealCards(targets: gsap.DOMTarget) {
   );
 }
 
+/** How long the availability sweep takes to cross the strip, in seconds. */
+const SWEEP_SPAN = 0.55;
+
+/**
+ * Drops every block of an availability strip back to its resting grey.
+ *
+ * Run the instant the selected range changes, before the new records land. The
+ * strip on screen describes the OLD window at the OLD block width, and leaving
+ * it up while the next window loads is exactly how a range switch used to flash
+ * downtime that never happened.
+ */
+export function fadeToPending(strip: HTMLElement | null): void {
+  if (!strip) return;
+  const slots = strip.querySelectorAll<HTMLElement>("[data-slot]");
+  if (!hasTarget(slots)) return;
+
+  if (reducedMotion()) {
+    // clearProps rather than scaleY: 1 — nothing scaled these, and writing an
+    // identity transform would pin every block to a compositor layer for good.
+    gsap.set(slots, { "--reveal": 0, clearProps: "transform" });
+    return;
+  }
+  gsap.to(slots, {
+    "--reveal": 0,
+    scaleY: 1,
+    duration: 0.2,
+    ease: "power1.out",
+    stagger: { amount: 0.12, from: "start" },
+    // A range switched twice in quick succession leaves two tweens fighting
+    // over the same property otherwise.
+    overwrite: "auto",
+  });
+}
+
+/**
+ * Resolves a grey strip into its colours, left to right, behind a scanline.
+ *
+ * The stagger uses `amount` rather than `each` so the sweep takes the same time
+ * whether the strip carries 24 blocks or 90 — with `each`, a wide window would
+ * crawl while a narrow one snapped.
+ */
+export function sweepReveal(
+  strip: HTMLElement | null,
+  options?: { delay?: number; onStart?: () => void },
+): gsap.core.Timeline | null {
+  if (!strip) return null;
+  const slots = strip.querySelectorAll<HTMLElement>("[data-slot]");
+  if (!hasTarget(slots)) return null;
+
+  const scan = strip.querySelector<HTMLElement>("[data-sweep]");
+
+  if (reducedMotion()) {
+    gsap.set(slots, { "--reveal": 1, clearProps: "transform" });
+    if (scan) gsap.set(scan, { opacity: 0 });
+    options?.onStart?.();
+    return null;
+  }
+
+  const tl = gsap.timeline({ delay: options?.delay ?? 0, onStart: options?.onStart });
+
+  tl.fromTo(
+    slots,
+    { "--reveal": 0, scaleY: 0.5 },
+    {
+      "--reveal": 1,
+      scaleY: 1,
+      duration: 0.4,
+      ease: "power2.out",
+      stagger: { amount: SWEEP_SPAN, from: "start" },
+      force3D: true,
+      // The resting CSS already says scaleY(1); leaving GSAP's inline transform
+      // behind would pin every block to a compositor layer for good.
+      clearProps: "transform",
+    },
+    0,
+  );
+
+  if (scan) {
+    // Travelled as a transform over the measured width rather than as `left`,
+    // which would relayout the whole strip on every frame of the sweep.
+    tl.fromTo(scan, { x: 0, opacity: 0 }, { opacity: 1, duration: 0.1, ease: "none" }, 0)
+      .to(scan, { x: strip.clientWidth, duration: SWEEP_SPAN, ease: "none" }, 0)
+      .to(scan, { opacity: 0, duration: 0.16, ease: "none" }, SWEEP_SPAN - 0.06);
+  }
+
+  return tl;
+}
+
 /** Decode-in effect for hostnames. Purely decorative, so it degrades to a no-op. */
 export function scrambleIn(el: Element | null | undefined, text: string, enabled: boolean) {
   if (!el) return;

@@ -107,11 +107,15 @@
   },
   "uptime": {
     "title": "Uptime",
-    "note": "Each block is one time slot. A slot is marked down when no telemetry was recorded in it.",
+    "note": "Each block covers {{slot}}. Downtime is inferred from gaps in telemetry: reporting must stop for more than {{gap}} to count.",
+    "noteBasic": "Each block covers {{slot}}.",
     "availability": "Availability",
+    "now": "now",
     "slotOnline": "Up",
     "slotOffline": "Down",
-    "slotUnknown": "No data"
+    "slotPartial": "Partly down",
+    "slotUnknown": "No data",
+    "downFor": "down {{duration}}"
   },
   "settings": {
     "title": "Display",
