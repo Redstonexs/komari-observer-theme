@@ -185,9 +185,14 @@ export function NodeDetail() {
             <ChartBlock title={t("card.memory")}>
               <LineChart
                 series={[
-                  toSeries(t("card.memory"), (r) =>
-                    r.ram_total > 0 ? (r.ram / r.ram_total) * 100 : 0,
-                  ),
+                  toSeries(t("card.memory"), (r) => {
+                    // Current Komari rebuilds history records from per-metric
+                    // series and never writes the *_total columns, so ram_total
+                    // arrives as 0 and the ratio would flatline. mem_total on
+                    // the node is the same constant the column used to carry.
+                    const total = r.ram_total > 0 ? r.ram_total : node.mem_total;
+                    return total > 0 ? (r.ram / total) * 100 : 0;
+                  }),
                 ]}
                 maxY={100}
                 formatY={(v) => `${Math.round(v)}%`}

@@ -273,13 +273,16 @@ function loadRecords(uuid, hours) {
       cpu: +(38 + Math.sin(phase) * 22 + Math.sin(phase * 3.3) * 7).toFixed(2),
       gpu: 0,
       ram: Math.round(node.mem_total * (0.45 + Math.sin(phase / 2) * 0.15)),
-      ram_total: node.mem_total,
+      // The real server rebuilds history from per-metric series and stores no
+      // capacity or temperature metric, so these columns come back zeroed.
+      // Mirror that: a mock that invents totals hides charts that divide by them.
+      ram_total: 0,
       swap: Math.round(node.swap_total * 0.1),
-      swap_total: node.swap_total,
+      swap_total: 0,
       load: +(1.2 + Math.sin(phase) * 0.8).toFixed(2),
-      temp: +(42 + Math.sin(phase) * 6).toFixed(1),
+      temp: 0,
       disk: Math.round(node.disk_total * 0.42),
-      disk_total: node.disk_total,
+      disk_total: 0,
       net_in: Math.round(500_000 + Math.sin(phase * 1.4) * 400_000),
       net_out: Math.round(320_000 + Math.cos(phase * 1.1) * 260_000),
       net_total_up: Math.round(40 * GiB + k * 1_000_000),

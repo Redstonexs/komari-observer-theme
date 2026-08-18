@@ -163,7 +163,16 @@ export interface LoadRecord {
   time: string;
   cpu: number;
   gpu: number;
+  /** Bytes used. */
   ram: number;
+  /**
+   * ALWAYS 0 on current servers — as are `swap_total`, `disk_total` and `temp`.
+   * History is reconstructed from the metric store's per-metric series, and
+   * that store only records the used/rate metrics; the reconstruction leaves
+   * every capacity column at its zero value. Take capacities from NodeInfo
+   * (`mem_total` / `swap_total` / `disk_total`) instead, and treat a non-zero
+   * value here as an older server rather than the norm.
+   */
   ram_total: number;
   swap: number;
   swap_total: number;
